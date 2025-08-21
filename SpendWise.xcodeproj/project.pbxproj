@@ -29,9 +29,22 @@
 		B2C5F67A2CFF9A94005B1AE8 /* SpendWiseUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpendWiseUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		B29E05472E114A83006C5FB1 /* Exceptions for "SpendWise" folder in "SpendWise" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = B2C5F65F2CFF9A93005B1AE8 /* SpendWise */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B2C5F6622CFF9A93005B1AE8 /* SpendWise */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				B29E05472E114A83006C5FB1 /* Exceptions for "SpendWise" folder in "SpendWise" target */,
+			);
 			path = SpendWise;
 			sourceTree = "<group>";
 		};
@@ -192,6 +205,7 @@
 			knownRegions = (
 				en,
 				Base,
+				tr,
 			);
 			mainGroup = B2C5F6572CFF9A93005B1AE8;
 			minimizedProjectReferenceProxies = 1;
@@ -395,7 +409,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"SpendWise/Preview Content\"";
 				DEVELOPMENT_TEAM = 9ZW7LJ44B6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -424,7 +437,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"SpendWise/Preview Content\"";
 				DEVELOPMENT_TEAM = 9ZW7LJ44B6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

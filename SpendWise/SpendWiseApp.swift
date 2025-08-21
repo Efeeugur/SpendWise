@@ -1,17 +1,17 @@
-//
-//  SpendWiseApp.swift
-//  SpendWise
-//
-//  Created by Efe Uğur on 3.12.2024.
-//
-
 import SwiftUI
 
 @main
 struct SpendWiseApp: App {
+    @StateObject private var themeManager = ThemeManager()
+    init() {
+        NotificationManager.shared.requestAuthorization { _ in }
+    }
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SplashView()
+                .environmentObject(themeManager)
+                .preferredColorScheme(themeManager.colorScheme)
         }
     }
 }
+
