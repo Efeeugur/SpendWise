@@ -48,80 +48,133 @@ struct ProfileSettingsView: View {
     var body: some View {
         NavigationStack {
             SwiftUI.Form {
-                // ACCOUNT
-                Section(header: Text("Account")) {
-                    VStack(spacing: 12) {
-                        Button(action: {
-                            if let user = user, user.isGuest {
-                                isAuthSheetPresented = true
-                            } else {
-                                showAccountSheet = true
-                            }
-                        }) {
+                // ACCOUNT SECTION
+                Section(header: Text("Account".localized)) {
+                    Button(action: {
+                        if let user = user, user.isGuest {
+                            isAuthSheetPresented = true
+                        } else {
+                            showAccountSheet = true
+                        }
+                    }) {
+                        HStack(spacing: 16) {
+                            // Avatar
                             if let user = user, !user.isGuest, let avatarData = user.avatarData,
                                let uiImage = UIImage(data: avatarData) {
                                 Image(uiImage: uiImage)
                                     .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 60, height: 60)
                                     .clipShape(Circle())
-                                    .frame(width: 80, height: 80)
-                                    .padding(.top, 16)
                             } else {
                                 Image(systemName: "person.crop.circle.fill")
-                                    .resizable()
-                                    .frame(width: 80, height: 80)
+                                    .font(.system(size: 60))
                                     .foregroundColor(.accentColor)
-                                    .padding(.top, 16)
                             }
-                        }
-                        .sheet(isPresented: $showAccountSheet) {
-                            AccountSheetView(user: $user, onLogout: handleLogout)
-                        }
-                        Text(getUserDisplayName())
-                            .font(.title2.bold())
-                        if let email = user?.email, !email.isEmpty {
-                            Text(email)
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-                // APP
-                Section(header: Text("App")) {
-                    Picker("Theme", selection: $themeManager.selectedTheme) {
-                        ForEach(UserDefaultsManager.AppTheme.allCases, id: \.self) { theme in
-                            Text(theme.rawValue).tag(theme)
-                        }
-                    }
-                    Picker("Language", selection: $languageManager.selectedLanguage) {
-                        ForEach(languageManager.supportedLanguages, id: \.self) { lang in
-                            Text(languageManager.languageDisplayNames[lang] ?? lang).tag(lang)
-                        }
-                    }
-                    Toggle(isOn: $notificationsEnabled) { Text("Notifications Enabled") }
-                    Toggle(isOn: $recommendationsEnabled) { Text("Smart Recommendations") }
-                        .onChange(of: recommendationsEnabled) { newValue in
-                            UserDefaultsManager.saveRecommendationsEnabled(newValue)
-                        }
-                    if recommendationsEnabled {
-                        Text("The app analyzes your spending habits and offers personalized suggestions.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    Button { showingSecurityView = true } label: {
-                        HStack {
-                            Image(systemName: "lock.shield"); Text("Security"); Spacer()
-                            Text(UserDefaultsManager.loadSecurityType().rawValue)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                            
+                            // User Info
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(getUserDisplayName())
+                                    .font(.headline)
+                                    .foregroundColor(.primary)
+                                
+                                Text(user?.email ?? "Sign In or Create Account".localized)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Spacer()
+                            
                             Image(systemName: "chevron.right")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
+                        .contentShape(Rectangle())
                     }
-                    // Monthly limit
+                    .buttonStyle(PlainButtonStyle())
+                    .sheet(isPresented: $showAccountSheet) {
+                        AccountSheetView(user: $user, onLogout: handleLogout)
+                    }
+                }
+                
+                // APPLICATION SECTION
+                Section(header: Text("Application".localized)) {
+                    // Notifications
                     HStack {
-                        Text("Monthly Spending Limit"); Spacer()
+                        Image(systemName: "bell")
+                            .foregroundColor(.orange)
+                            .frame(width: 24)
+                        Toggle(isOn: $notificationsEnabled) {
+                            Text("Notifications".localized)
+                        }
+                    }
+                    
+                    // Theme
+                    HStack {
+                        Image(systemName: themeManager.selectedTheme == .dark ? "moon" : "sun.max")
+                            .foregroundColor(.blue)
+                            .frame(width: 24)
+                        Picker("Theme".localized, selection: $themeManager.selectedTheme) {
+                            ForEach(UserDefaultsManager.AppTheme.allCases, id: \.self) { theme in
+                                Text(theme.rawValue.localized).tag(theme)
+                            }
+                        }
+                    }
+                    
+                    // Language
+                    HStack {
+                        Image(systemName: "globe")
+                            .foregroundColor(.green)
+                            .frame(width: 24)
+                        Picker("Language".localized, selection: $languageManager.selectedLanguage) {
+                            ForEach(languageManager.supportedLanguages, id: \.self) { lang in
+                                Text(languageManager.languageDisplayNames[lang] ?? lang).tag(lang)
+                            }
+                        }
+                    }
+                    
+                    // Currency
+                    HStack {
+                        Image(systemName: "dollarsign.circle")
+                            .foregroundColor(.yellow)
+                            .frame(width: 24)
+                        Picker("Currency".localized, selection: $defaultCurrency) {
+                            ForEach(Currency.allCases, id: \.self) { currency in
+                                Text("\(currency.rawValue) (\(currency.symbol))").tag(currency)
+                            }
+                        }
+                        .onChange(of: defaultCurrency) { newValue in
+                            UserDefaultsManager.saveDefaultCurrency(newValue)
+                        }
+                    }
+                    
+                    // Smart Recommendations
+                    HStack {
+                        Image(systemName: "brain")
+                            .foregroundColor(.purple)
+                            .frame(width: 24)
+                        Toggle(isOn: $recommendationsEnabled) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Smart Recommendations".localized)
+                                if recommendationsEnabled {
+                                    Text("AI analyzes spending patterns for insights".localized)
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                    }
+                    .onChange(of: recommendationsEnabled) { newValue in
+                        UserDefaultsManager.saveRecommendationsEnabled(newValue)
+                    }
+                    
+                    // Monthly Spending Limit
+                    HStack {
+                        Image(systemName: "chart.line.uptrend.xyaxis")
+                            .foregroundColor(.red)
+                            .frame(width: 24)
+                        Text("Monthly Spending Limit".localized)
+                        Spacer()
                         TextField("0", text: $monthlyLimitText)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
@@ -130,11 +183,123 @@ struct ProfileSettingsView: View {
                             if let limit = Double(monthlyLimitText.replacingOccurrences(of: ",", with: ".")) {
                                 UserDefaultsManager.saveMonthlyLimit(limit)
                                 showLimitSaved = true
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { showLimitSaved = false }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                    showLimitSaved = false
+                                }
                             }
-                        }) { Image(systemName: "checkmark.circle.fill").foregroundColor(.green) }
+                        }) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                        }
                     }
-                    if showLimitSaved { Text("Limit saved!").font(.caption).foregroundColor(.green) }
+                    
+                    if showLimitSaved {
+                        Text("Limit saved!".localized)
+                            .font(.caption)
+                            .foregroundColor(.green)
+                    }
+                }
+                
+                // SECURITY SECTION
+                Section(header: Text("Security".localized)) {
+                    Button {
+                        showingSecurityView = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "lock.shield")
+                                .foregroundColor(.blue)
+                                .frame(width: 24)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("App Protection".localized)
+                                    .foregroundColor(.primary)
+                                Text(UserDefaultsManager.loadSecurityType().rawValue)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+                
+                // REPORTS SECTION
+                Section(header: Text("Reports".localized)) {
+                    // Export Data
+                    Button {
+                        // TODO: Implement export functionality
+                    } label: {
+                        HStack {
+                            Image(systemName: "square.and.arrow.up")
+                                .foregroundColor(.indigo)
+                                .frame(width: 24)
+                            Text("Export Data".localized)
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+                
+                // SUPPORT SECTION
+                Section(header: Text("Support".localized)) {
+                    // Help & FAQ
+                    Button {
+                        // TODO: Implement help/FAQ
+                    } label: {
+                        HStack {
+                            Image(systemName: "questionmark.circle")
+                                .foregroundColor(.orange)
+                                .frame(width: 24)
+                            Text("Help & FAQ".localized)
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    // Rate App
+                    Button {
+                        // TODO: Implement rate app functionality
+                    } label: {
+                        HStack {
+                            Image(systemName: "star")
+                                .foregroundColor(.yellow)
+                                .frame(width: 24)
+                            Text("Rate App".localized)
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+                
+                // APP INFO SECTION
+                Section(header: Text("App Info".localized)) {
+                    HStack {
+                        Text("Version".localized)
+                        Spacer()
+                        Text("1.0.0")
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    HStack {
+                        Text("Developer".localized)
+                        Spacer()
+                        Text("SpendWise Team")
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
             .navigationTitle("Profile & Settings")
@@ -194,79 +359,283 @@ struct AccountSheetView: View {
     let onLogout: () -> Void
     @Environment(\.dismiss) var dismiss
     @State private var showDeleteAlert = false
+    @State private var showLogoutAlert = false
     @State private var isDeleting = false
-    @State private var age: Int = 0
-    @State private var gender: String = "Not Specified"
+    @State private var isEditing = false
+    @State private var editingName: String = ""
+    @State private var editingEmail: String = ""
     @State private var avatarItem: PhotosPickerItem?
     @State private var selectedAvatarImage: UIImage? = nil
+    
+    // Date formatter for member since display
+    private var memberSinceFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter
+    }
+    
+    // Placeholder date - could be enhanced to track actual registration date
+    private var memberSinceDate: Date {
+        // For demo purposes, using a static date
+        Calendar.current.date(byAdding: .month, value: -6, to: Date()) ?? Date()
+    }
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section(header: Text("Profile")) {
-                    HStack(spacing: 16) {
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Header with close and edit buttons
+                    HStack {
+                        Button("Close".localized) {
+                            dismiss()
+                        }
+                        .foregroundColor(.blue)
+                        
+                        Spacer()
+                        
+                        Text("Profile".localized)
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                        
+                        Spacer()
+                        
+                        Button(isEditing ? "Done".localized : "Edit".localized) {
+                            if isEditing {
+                                saveChanges()
+                            } else {
+                                startEditing()
+                            }
+                        }
+                        .foregroundColor(.blue)
+                        .fontWeight(.medium)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
+                    
+                    // Avatar Section
+                    VStack(spacing: 16) {
                         ZStack {
+                            // Avatar Image
                             if let ui = selectedAvatarImage {
                                 Image(uiImage: ui)
-                                    .resizable().scaledToFill()
-                                    .frame(width: 80, height: 80)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 96, height: 96)
                                     .clipShape(Circle())
                             } else if let data = user?.avatarData, let ui = UIImage(data: data) {
                                 Image(uiImage: ui)
-                                    .resizable().scaledToFill()
-                                    .frame(width: 80, height: 80)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 96, height: 96)
                                     .clipShape(Circle())
                             } else {
-                                Image(systemName: "person.circle.fill").font(.system(size: 80)).foregroundColor(.secondary)
+                                Image(systemName: "person.crop.circle.fill")
+                                    .font(.system(size: 96))
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            // Camera button for editing
+                            if isEditing && !(user?.isGuest == true) {
+                                PhotosPicker(selection: $avatarItem, matching: .images, photoLibrary: .shared()) {
+                                    Image(systemName: "camera.fill")
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(.white)
+                                        .frame(width: 32, height: 32)
+                                        .background(Color.blue)
+                                        .clipShape(Circle())
+                                        .shadow(radius: 2)
+                                }
+                                .offset(x: 34, y: 34)
                             }
                         }
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(getUserDisplayNameForAccount()).font(.headline)
-                            if let email = user?.email { Text(email).font(.subheadline).foregroundColor(.secondary) }
-                            PhotosPicker(selection: $avatarItem, matching: .images, photoLibrary: .shared()) {
-                                Label("Change Photo", systemImage: "camera").font(.subheadline)
-                            }
-                            .disabled(user?.isGuest == true)
+                        
+                        // Member Since Info
+                        VStack(spacing: 4) {
+                            Text("Member Since".localized)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text(memberSinceFormatter.string(from: memberSinceDate))
+                                .font(.subheadline)
+                                .foregroundColor(.primary)
                         }
                     }
-                }
-                if let u = user, !u.isGuest {
-                    Section(header: Text("Preferences")) {
-                        Stepper(value: $age, in: 0...120) { Text("Age: \(age)") }
-                        Picker("Gender", selection: $gender) {
-                            Text("Not Specified").tag("Not Specified"); Text("Male").tag("Male"); Text("Female").tag("Female"); Text("Other").tag("Other")
-                        }.pickerStyle(.segmented)
-                    }
-                    Section(header: Text("Session")) {
-                        Button(role: .destructive) { onLogout(); dismiss() } label: { Label("Logout", systemImage: "rectangle.portrait.and.arrow.right") }
-                        Button(role: .destructive) { showDeleteAlert = true } label: { Label("Clear All Data", systemImage: "trash") }
-                            .alert(isPresented: $showDeleteAlert) {
-                                Alert(title: Text("Clear All Data"), message: Text("Are you sure you want to permanently clear all your data? This action cannot be undone."), primaryButton: .destructive(Text("Yes, Clear")) { Task { await handleDeleteAccount(); dismiss() } }, secondaryButton: .cancel())
+                    .padding(.vertical, 24)
+                    
+                    // User Information Section
+                    VStack(spacing: 20) {
+                        // Username Field
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Image(systemName: "person")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(.blue)
+                                Text("Username".localized)
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
                             }
+                            
+                            if isEditing && !(user?.isGuest == true) {
+                                TextField("Enter username".localized, text: $editingName)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .frame(height: 44)
+                            } else {
+                                Text(getUserDisplayNameForAccount())
+                                    .font(.body)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 12)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .frame(height: 44)
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(8)
+                            }
+                        }
+                        
+                        // Email Field
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Image(systemName: "envelope")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(.blue)
+                                Text("Email".localized)
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                            }
+                            
+                            if isEditing && !(user?.isGuest == true) {
+                                TextField("Enter email".localized, text: $editingEmail)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.emailAddress)
+                                    .autocapitalization(.none)
+                                    .frame(height: 44)
+                            } else {
+                                Text(user?.email ?? "Sign In or Create Account".localized)
+                                    .font(.body)
+                                    .foregroundColor(user?.email != nil ? .primary : .secondary)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 12)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .frame(height: 44)
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(8)
+                            }
+                        }
                     }
-                } else {
-                    Section(header: Text("Session")) {
-                        Button { onLogout(); dismiss() } label: { Label("Sign In", systemImage: "person.crop.circle.badge.plus") }
+                    .padding(.horizontal, 20)
+                    
+                    // Action Buttons Section
+                    VStack(spacing: 16) {
+                        if let u = user, !u.isGuest {
+                            // Logout Button
+                            Button {
+                                showLogoutAlert = true
+                            } label: {
+                                HStack {
+                                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                                        .font(.system(size: 18))
+                                    Text("Sign Out".localized)
+                                        .font(.body)
+                                        .fontWeight(.medium)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .background(Color(.systemGray6))
+                                .foregroundColor(.orange)
+                                .cornerRadius(12)
+                            }
+                            
+                            // Delete Account Button
+                            Button {
+                                showDeleteAlert = true
+                            } label: {
+                                HStack {
+                                    Image(systemName: "trash")
+                                        .font(.system(size: 18))
+                                    Text("Delete Account".localized)
+                                        .font(.body)
+                                        .fontWeight(.medium)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .background(Color(.systemGray6))
+                                .foregroundColor(.red)
+                                .cornerRadius(12)
+                            }
+                        } else {
+                            // Sign In Button for Guest
+                            Button {
+                                onLogout()
+                                dismiss()
+                            } label: {
+                                HStack {
+                                    Image(systemName: "person.crop.circle.badge.plus")
+                                        .font(.system(size: 18))
+                                    Text("Sign In".localized)
+                                        .font(.body)
+                                        .fontWeight(.medium)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                            }
+                        }
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 32)
+                    .padding(.bottom, 20)
                 }
             }
-            .navigationTitle("Account Details").navigationBarTitleDisplayMode(.inline)
-            .onChange(of: avatarItem) { newItem in
-                guard let newItem else { return }
-                Task {
-                    if let data = try? await newItem.loadTransferable(type: Data.self) {
-                        selectedAvatarImage = UIImage(data: data)
-                        if var u = user { u.avatarData = data; user = u }
-                    }
+            .background(Color(.systemGroupedBackground))
+        }
+        .alert("Sign Out Confirmation".localized, isPresented: $showLogoutAlert) {
+            Button("Cancel".localized, role: .cancel) { }
+            Button("Sign Out".localized, role: .destructive) {
+                onLogout()
+                dismiss()
+            }
+        } message: {
+            Text("Are you sure you want to sign out?".localized)
+        }
+        .alert("Delete Account".localized, isPresented: $showDeleteAlert) {
+            Button("Cancel".localized, role: .cancel) { }
+            Button("Delete".localized, role: .destructive) {
+                Task { await handleDeleteAccount(); dismiss() }
+            }
+        } message: {
+            Text("Are you sure you want to permanently delete your account? This action cannot be undone.".localized)
+        }
+        .onChange(of: avatarItem) { newItem in
+            guard let newItem else { return }
+            Task {
+                if let data = try? await newItem.loadTransferable(type: Data.self) {
+                    selectedAvatarImage = UIImage(data: data)
+                    if var u = user { u.avatarData = data; user = u }
                 }
             }
         }
     }
+    
+    private func startEditing() {
+        isEditing = true
+        editingName = user?.name ?? ""
+        editingEmail = user?.email ?? ""
+    }
+    
+    private func saveChanges() {
+        if var u = user {
+            u.name = editingName.isEmpty ? nil : editingName
+            u.email = editingEmail.isEmpty ? nil : editingEmail
+            user = u
+            UserDefaultsManager.saveUser(u)
+        }
+        isEditing = false
+    }
     private func getUserDisplayNameForAccount() -> String {
-        guard let user = user else { return "Guest User" }
+        guard let user = user else { return "Guest User".localized }
         
         if user.isGuest {
-            return "Guest User"
+            return "Guest User".localized
         }
         
         // If user has a name, use it
@@ -276,10 +645,10 @@ struct AccountSheetView: View {
         
         // Otherwise derive from email
         if let email = user.email, !email.isEmpty {
-            return email.components(separatedBy: "@").first?.capitalized ?? "User"
+            return email.components(separatedBy: "@").first?.capitalized ?? "User".localized
         }
         
-        return "User"
+        return "User".localized
     }
     
     @MainActor

@@ -7,44 +7,36 @@ struct IncomesView: View {
     @State private var showAddIncomeModal: Bool = false
     @State private var incomeToEdit: Income? = nil
     @State private var isLoading: Bool = false
+    @State private var selectedFilter: IncomeFilter = .all
+    @StateObject private var currencyManager = CurrencyManager.shared
+    
+    private var selectedDisplayCurrency: Currency { 
+        UserDefaultsManager.loadDefaultCurrency() 
+    }
+    
     var body: some View {
-        ZStack {
-            Color(.systemBackground).ignoresSafeArea()
-            VStack {
+        VStack(spacing: 0) {
+            // Header Section
+            headerSection
+            
+            // Content
             if filteredIncomes.isEmpty {
-                    Spacer()
-                    ContentUnavailableView(label: {
-                        Label("No Income".localized, systemImage: "tray")
-                    }, description: {
-                        Text("You haven't added any income yet. You can add new income from the top right.".localized)
-                    })
-                    Spacer()
-                } else {
-                    List {
-                        ForEach(filteredIncomes) { income in
-                            Button {
-                                incomeToEdit = income
-                            } label: {
-                            IncomeRow(income: income)
-                            }
-                            .listRowBackground(Color(.systemBackground))
-                        }
-                        .onDelete(perform: deleteIncomes)
-                    }
-                    .listStyle(.plain)
-                    .background(Color(.systemBackground))
-                }
+                emptyStateView
+            } else {
+                incomeListView
             }
         }
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search Income".localized)
+        .background(Color(.systemGroupedBackground))
+        .searchable(text: $searchText, prompt: "Search Income".localized)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { showAddIncomeModal = true }) {
-                    Image(systemName: "plus")
-                }
+                addIncomeButton
             }
             ToolbarItem(placement: .navigationBarLeading) {
-                if isLoading { ProgressView() }
+                if isLoading { 
+                    ProgressView()
+                        .scaleEffect(0.8)
+                }
             }
         }
         .sheet(isPresented: $showAddIncomeModal) {
@@ -55,20 +47,244 @@ struct IncomesView: View {
         }
         .task(id: userId) { await loadRemoteIfNeeded() }
     }
+    
+    // MARK: - Header Section
+    private var headerSection: some View {
+        VStack(spacing: 16) {
+            // Summary Card
+            incomeSummaryCard
+            
+            // Filter Tabs
+            if !incomes.isEmpty {
+                filterTabs
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 8)
+        .padding(.bottom, 16)
+    }
+    
+    private var incomeSummaryCard: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Image(systemName: "arrow.up.circle.fill")
+                    .font(.system(size: 20))
+                    .foregroundColor(.white)
+                Text("Total Income".localized)
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.9))
+                Spacer()
+            }
+            
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(currencyManager.formatAmount(totalIncome, currency: selectedDisplayCurrency))
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.white)
+                        .minimumScaleFactor(0.8)
+                        .lineLimit(1)
+                    
+                    Text("\(incomes.count) income\(incomes.count == 1 ? "" : "s")")
+                        .font(.caption)
+                        .foregroundColor(.white.opacity(0.8))
+                }
+                Spacer()
+            }
+        }
+        .padding(20)
+        .background(
+            LinearGradient(
+                colors: [Color.green, Color.green.opacity(0.8)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .cornerRadius(16)
+        .shadow(color: .green.opacity(0.3), radius: 8, x: 0, y: 4)
+    }
+    
+    private var filterTabs: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                ForEach(IncomeFilter.allCases, id: \.self) { filter in
+                    filterTab(filter)
+                }
+            }
+            .padding(.horizontal, 20)
+        }
+        .padding(.horizontal, -20)
+    }
+    
+    private func filterTab(_ filter: IncomeFilter) -> some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                selectedFilter = filter
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: filter.icon)
+                    .font(.system(size: 14))
+                Text(filter.title)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(
+                selectedFilter == filter ? 
+                Color.green : Color(.systemGray6)
+            )
+            .foregroundColor(
+                selectedFilter == filter ? 
+                .white : .primary
+            )
+            .cornerRadius(20)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    // MARK: - Add Income Button
+    private var addIncomeButton: some View {
+        Button {
+            showAddIncomeModal = true
+        } label: {
+            Image(systemName: "plus.circle.fill")
+                .font(.system(size: 28))
+                .foregroundColor(.green)
+                .background(
+                    Circle()
+                        .fill(Color(.systemBackground))
+                        .frame(width: 30, height: 30)
+                )
+        }
+    }
+    
+    // MARK: - Empty State
+    private var emptyStateView: some View {
+        VStack(spacing: 24) {
+            Spacer()
+            
+            ZStack {
+                Circle()
+                    .fill(Color.green.opacity(0.1))
+                    .frame(width: 120, height: 120)
+                
+                Image(systemName: "arrow.up.circle")
+                    .font(.system(size: 60))
+                    .foregroundColor(.green.opacity(0.7))
+            }
+            
+            VStack(spacing: 8) {
+                Text("No Income Yet".localized)
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                
+                Text("Start tracking your income sources to get insights into your financial growth.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            }
+            
+            Button {
+                showAddIncomeModal = true
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 16, weight: .semibold))
+                    Text("Add First Income")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+                .background(Color.green)
+                .cornerRadius(25)
+            }
+            
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    // MARK: - Income List
+    private var incomeListView: some View {
+        ScrollView {
+            LazyVStack(spacing: 12) {
+                ForEach(filteredIncomes) { income in
+                    IncomeCard(
+                        income: income,
+                        onTap: { incomeToEdit = income },
+                        onDelete: { deleteIncome(income) }
+                    )
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 32)
+        }
+    }
 
+    // MARK: - Computed Properties
+    private var totalIncome: Double {
+        incomes.reduce(0) { $0 + currencyManager.convert($1.amount, from: $1.currency, to: selectedDisplayCurrency) }
+    }
+    
     var filteredIncomes: [Income] {
-        if searchText.isEmpty {
-            return incomes
+        var filtered = incomes
+        
+        // Apply filter selection
+        switch selectedFilter {
+        case .all:
+            break
+        case .thisMonth:
+            let calendar = Calendar.current
+            let now = Date()
+            filtered = filtered.filter { calendar.isDate($0.date, equalTo: now, toGranularity: .month) }
+        case .category(let category):
+            filtered = filtered.filter { $0.category == category }
+        }
+        
+        // Apply search text
+        if !searchText.isEmpty {
+            filtered = filtered.filter { $0.title.lowercased().contains(searchText.lowercased()) }
+        }
+        
+        // Sort by date (newest first)
+        return filtered.sorted { $0.date > $1.date }
+    }
+
+    // MARK: - Actions
+    private func deleteIncome(_ income: Income) {
+        withAnimation {
+            incomes.removeAll { $0.id == income.id }
+        }
+        
+        if userId != "guest" {
+            Task { 
+                try? await SupabaseService.shared.deleteIncome(id: income.id) 
+            }
         } else {
-            return incomes.filter { $0.title.lowercased().contains(searchText.lowercased()) }
+            UserDefaultsManager.saveIncomes(incomes, forUser: userId)
         }
     }
 
     func deleteIncomes(at offsets: IndexSet) {
-        let ids = offsets.map { incomes[$0].id }
-        incomes.remove(atOffsets: offsets)
+        let incomesToDelete = offsets.map { filteredIncomes[$0] }
+        
+        withAnimation {
+            for income in incomesToDelete {
+                incomes.removeAll { $0.id == income.id }
+            }
+        }
+        
         if userId != "guest" {
-            Task { for id in ids { try? await SupabaseService.shared.deleteIncome(id: id) } }
+            Task { 
+                for income in incomesToDelete {
+                    try? await SupabaseService.shared.deleteIncome(id: income.id)
+                }
+            }
         } else {
             UserDefaultsManager.saveIncomes(incomes, forUser: userId)
         }
@@ -83,43 +299,196 @@ struct IncomesView: View {
     }
 }
 
-struct IncomeRow: View {
+// MARK: - Supporting Types
+enum IncomeFilter: CaseIterable, Hashable {
+    case all
+    case thisMonth
+    case category(IncomeCategory)
+    
+    static var allCases: [IncomeFilter] {
+        var cases: [IncomeFilter] = [.all, .thisMonth]
+        cases.append(contentsOf: IncomeCategory.allCases.map { .category($0) })
+        return cases
+    }
+    
+    var title: String {
+        switch self {
+        case .all:
+            return "All"
+        case .thisMonth:
+            return "This Month"
+        case .category(let category):
+            return category.rawValue.localized
+        }
+    }
+    
+    var icon: String {
+        switch self {
+        case .all:
+            return "list.bullet"
+        case .thisMonth:
+            return "calendar"
+        case .category(let category):
+            switch category {
+            case .salary:
+                return "briefcase"
+            case .additionalIncome:
+                return "plus.circle"
+            case .gift:
+                return "gift"
+            case .other:
+                return "ellipsis.circle"
+            }
+        }
+    }
+}
+
+// MARK: - Income Card Component
+struct IncomeCard: View {
     let income: Income
+    let onTap: () -> Void
+    let onDelete: () -> Void
     @StateObject private var currencyManager = CurrencyManager.shared
-    @State private var showingDetail = false
+    @State private var showingDeleteAlert = false
     
     var body: some View {
-        HStack {
-            // Show photo if exists
+        Button {
+            onTap()
+        } label: {
+            HStack(spacing: 16) {
+                // Icon or Photo
+                incomeIcon
+                
+                // Content
+                VStack(alignment: .leading, spacing: 6) {
+                    // Title and Amount
+                    HStack {
+                        Text(income.title)
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                            .lineLimit(1)
+                        
+                        Spacer()
+                        
+                        Text(currencyManager.formatAmount(income.amount, currency: income.currency))
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(.green)
+                    }
+                    
+                    // Category and Date
+                    HStack {
+                        categoryTag
+                        
+                        Spacer()
+                        
+                        HStack(spacing: 4) {
+                            Image(systemName: "calendar")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text(formatDate(income.date))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    // Note if exists
+                    if let note = income.note, !note.isEmpty {
+                        Text(note)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(2)
+                            .padding(.top, 2)
+                    }
+                }
+            }
+            .padding(16)
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+            .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .contextMenu {
+            Button("Edit", systemImage: "pencil") {
+                onTap()
+            }
+            
+            Button("Delete", systemImage: "trash", role: .destructive) {
+                showingDeleteAlert = true
+            }
+        }
+        .alert("Delete Income", isPresented: $showingDeleteAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                onDelete()
+            }
+        } message: {
+            Text("Are you sure you want to delete this income entry?")
+        }
+    }
+    
+    private var incomeIcon: some View {
+        Group {
             if let photoData = income.photoData, let uiImage = UIImage(data: photoData) {
                 Image(uiImage: uiImage)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 50, height: 50)
-                    .clipped()
-                    .cornerRadius(8)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
             } else {
-                Image(systemName: "photo")
-                    .font(.title2)
-                    .foregroundColor(.secondary)
-                    .frame(width: 50, height: 50)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color.green.opacity(0.1))
+                        .frame(width: 50, height: 50)
+                    
+                    Image(systemName: categoryIcon)
+                        .font(.system(size: 24))
+                        .foregroundColor(.green)
+                }
             }
-            VStack(alignment: .leading, spacing: 4) {
-                Text(income.title)
-                    .font(.headline)
-                Text(currencyManager.formatAmount(income.amount, currency: income.currency))
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                Text(income.category.rawValue)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+        }
+    }
+    
+    private var categoryTag: some View {
+        Text(income.category.rawValue.localized)
+            .font(.caption)
+            .fontWeight(.medium)
+            .foregroundColor(.green)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color.green.opacity(0.1))
+            .cornerRadius(8)
+    }
+    
+    private var categoryIcon: String {
+        switch income.category {
+        case .salary:
+            return "briefcase.fill"
+        case .additionalIncome:
+            return "plus.circle.fill"
+        case .gift:
+            return "gift.fill"
+        case .other:
+            return "ellipsis.circle.fill"
+        }
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let calendar = Calendar.current
+        
+        if calendar.isDateInToday(date) {
+            return "Today"
+        } else if calendar.isDateInYesterday(date) {
+            return "Yesterday"
+        } else {
+            let formatter = DateFormatter()
+            if calendar.isDate(date, equalTo: Date(), toGranularity: .year) {
+                formatter.dateFormat = "MMM d"
+            } else {
+                formatter.dateFormat = "MMM d, yyyy"
             }
-            Spacer()
-            Text(income.date, style: .date)
-                .font(.caption)
-                .foregroundColor(.secondary)
+            return formatter.string(from: date)
         }
     }
 }
