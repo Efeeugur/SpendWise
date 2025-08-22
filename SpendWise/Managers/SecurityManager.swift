@@ -2,7 +2,7 @@ import Foundation
 import LocalAuthentication
 import SwiftUI
 
-enum SecurityType: String, CaseIterable {
+enum SecurityType: String, CaseIterable, Codable {
     case none = "No Protection"
     case password = "Password"
     case biometric = "Face ID / Touch ID"

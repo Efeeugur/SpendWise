@@ -197,15 +197,27 @@ struct LoginOrRegisterView: View {
         isLoading = true
         Task {
             do {
-                let loggedEmail = try await SupabaseService.shared.signIn(email: email, password: password)
+                let loggedEmail: String
+                if isLoginMode {
+                    loggedEmail = try await SupabaseService.shared.signIn(email: email, password: password)
+                } else {
+                    loggedEmail = try await SupabaseService.shared.signUp(email: email, password: password, name: email.components(separatedBy: "@").first ?? "User")
+                }
                 await MainActor.run {
-                    self.user = User(email: loggedEmail, isGuest: false)
+                    let userName = loggedEmail.components(separatedBy: "@").first?.capitalized ?? "User"
+                    let newUser = User(email: loggedEmail, name: userName, isGuest: false)
+                    self.user = newUser
+                    UserDefaultsManager.saveUser(newUser)
+                    
+                    // Post notification that user logged in
+                    NotificationCenter.default.post(name: .userDidLogin, object: nil)
+                    
                     self.isPresented = false
                     self.isLoading = false
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Login failed. Please check your credentials."
+                    self.errorMessage = isLoginMode ? "Login failed. Please check your credentials." : "Registration failed. Please try again."
                     self.isLoading = false
                 }
             }

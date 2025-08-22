@@ -76,7 +76,7 @@ struct ProfileSettingsView: View {
                         .sheet(isPresented: $showAccountSheet) {
                             AccountSheetView(user: $user, onLogout: handleLogout)
                         }
-                        Text(user?.name ?? "Guest User")
+                        Text(getUserDisplayName())
                             .font(.title2.bold())
                         if let email = user?.email, !email.isEmpty {
                             Text(email)
@@ -160,6 +160,26 @@ struct ProfileSettingsView: View {
             if let data = try? JSONEncoder().encode(updated), let str = String(data: data, encoding: .utf8) { homeCardsRaw = str }
         })
     }
+    private func getUserDisplayName() -> String {
+        guard let user = user else { return "Guest User" }
+        
+        if user.isGuest {
+            return "Guest User"
+        }
+        
+        // If user has a name, use it
+        if let name = user.name, !name.isEmpty {
+            return name
+        }
+        
+        // Otherwise derive from email
+        if let email = user.email, !email.isEmpty {
+            return email.components(separatedBy: "@").first?.capitalized ?? "User"
+        }
+        
+        return "User"
+    }
+    
     func handleLogout() {
         UserDefaultsManager.clearAllUserData(forUser: userId)
         UserDefaultsManager.saveIncomes([], forUser: userId)
@@ -201,7 +221,7 @@ struct AccountSheetView: View {
                             }
                         }
                         VStack(alignment: .leading, spacing: 6) {
-                            Text(user?.name ?? "Guest User").font(.headline)
+                            Text(getUserDisplayNameForAccount()).font(.headline)
                             if let email = user?.email { Text(email).font(.subheadline).foregroundColor(.secondary) }
                             PhotosPicker(selection: $avatarItem, matching: .images, photoLibrary: .shared()) {
                                 Label("Change Photo", systemImage: "camera").font(.subheadline)
@@ -242,6 +262,26 @@ struct AccountSheetView: View {
             }
         }
     }
+    private func getUserDisplayNameForAccount() -> String {
+        guard let user = user else { return "Guest User" }
+        
+        if user.isGuest {
+            return "Guest User"
+        }
+        
+        // If user has a name, use it
+        if let name = user.name, !name.isEmpty {
+            return name
+        }
+        
+        // Otherwise derive from email
+        if let email = user.email, !email.isEmpty {
+            return email.components(separatedBy: "@").first?.capitalized ?? "User"
+        }
+        
+        return "User"
+    }
+    
     @MainActor
     func handleDeleteAccount() async {
         guard let u = user else { return }

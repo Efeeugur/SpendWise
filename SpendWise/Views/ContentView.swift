@@ -1,5 +1,9 @@
 import SwiftUI
 
+extension Notification.Name {
+    static let userDidLogin = Notification.Name("userDidLogin")
+}
+
 struct ContentView: View {
     @State private var user: User? = UserDefaultsManager.loadUser()
 
@@ -82,6 +86,10 @@ struct ContentView: View {
                 securityManager.isAuthenticated = false
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .userDidLogin)) { _ in
+            // Reload user when login notification is received
+            user = UserDefaultsManager.loadUser()
+        }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
             if UserDefaultsManager.loadSecurityType() != .none {
                 securityManager.logout()
@@ -99,6 +107,10 @@ struct ContentView: View {
         .onChange(of: user ?? User(isGuest: true)) { newUser in
             let newId = (newUser.isGuest == true) ? "guest" : (newUser.email ?? "guest")
             userId = newId
+            
+            // Save the updated user state
+            UserDefaultsManager.saveUser(newUser)
+            
             if newId == "guest" {
                 incomes = []
                 expenses = []
