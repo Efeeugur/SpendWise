@@ -45,8 +45,8 @@ struct ExpensesView: View {
             AddExpenseView(expenses: $expenses, userEmail: userId == "guest" ? nil : userId)
         }
         .sheet(item: $expenseToEdit) { expense in
-            if let index = expenses.firstIndex(where: { $0.id == expense.id }) {
-                EditExpenseView(expenses: $expenses, expense: $expenses[index])
+            if expenses.firstIndex(where: { $0.id == expense.id }) != nil {
+                EditExpenseView(expenses: $expenses, expense: .constant(expense))
             }
         }
         .task(id: userId) { await loadRemoteIfNeeded() }
@@ -236,15 +236,19 @@ struct ExpensesView: View {
     
     // MARK: - Expense List
     private var expenseListView: some View {
-        PerformantList(filteredExpenses) { expense in
-            ExpenseCard(
-                expense: expense,
-                onTap: { expenseToEdit = expense },
-                onDelete: { deleteExpense(expense) }
-            )
-            .performanceOptimized()
+        ScrollView {
+            LazyVStack(spacing: 12) {
+                ForEach(filteredExpenses) { expenses in
+                    ExpenseCard(
+                        expense: expenses,
+                        onTap: { expenseToEdit = expenses },
+                        onDelete: { deleteExpense(expenses) }
+                    )
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 32)
         }
-        .padding(.horizontal, 20)
     }
 
     // MARK: - Computed Properties
