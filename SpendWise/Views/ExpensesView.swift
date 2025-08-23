@@ -1,5 +1,7 @@
 import SwiftUI
 
+@MainActor
+
 struct ExpensesView: View {
     @Binding var expenses: [Expense]
     @Binding var userId: String
@@ -234,19 +236,15 @@ struct ExpensesView: View {
     
     // MARK: - Expense List
     private var expenseListView: some View {
-        ScrollView {
-            LazyVStack(spacing: 12) {
-                ForEach(filteredExpenses) { expense in
-                    ExpenseCard(
-                        expense: expense,
-                        onTap: { expenseToEdit = expense },
-                        onDelete: { deleteExpense(expense) }
-                    )
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 32)
+        PerformantList(filteredExpenses) { expense in
+            ExpenseCard(
+                expense: expense,
+                onTap: { expenseToEdit = expense },
+                onDelete: { deleteExpense(expense) }
+            )
+            .performanceOptimized()
         }
+        .padding(.horizontal, 20)
     }
 
     // MARK: - Computed Properties
@@ -254,7 +252,15 @@ struct ExpensesView: View {
         expenses.reduce(0) { $0 + currencyManager.convert($1.amount, from: $1.currency, to: selectedDisplayCurrency) }
     }
     
-    var filteredExpenses: [Expense] {
+    private var filteredExpenses: [Expense] {
+        // Cache expensive computations
+        let cacheKey = "\(expenses.count)-\(selectedFilter)-\(searchText)"
+        
+        // Simple memoization for performance
+        if let cached = filteredExpensesCache[cacheKey] {
+            return cached
+        }
+        
         var filtered = expenses
         
         // Apply filter selection
@@ -273,12 +279,25 @@ struct ExpensesView: View {
         
         // Apply search text
         if !searchText.isEmpty {
-            filtered = filtered.filter { $0.title.lowercased().contains(searchText.lowercased()) }
+            let lowercaseSearch = searchText.lowercased()
+            filtered = filtered.filter { $0.title.lowercased().contains(lowercaseSearch) }
         }
         
-        // Sort by date (newest first)
-        return filtered.sorted { $0.date > $1.date }
+        let result = filtered.sorted { $0.date > $1.date }
+        
+        // Cache result
+        filteredExpensesCache[cacheKey] = result
+        
+        // Clean cache if it gets too large
+        if filteredExpensesCache.count > 10 {
+            filteredExpensesCache.removeAll()
+            filteredExpensesCache[cacheKey] = result
+        }
+        
+        return result
     }
+    
+    @State private var filteredExpensesCache: [String: [Expense]] = [:]
 
     // MARK: - Actions
     private func deleteExpense(_ expense: Expense) {

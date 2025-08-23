@@ -4,14 +4,16 @@ extension Notification.Name {
     static let userDidLogin = Notification.Name("userDidLogin")
 }
 
+@MainActor
+
 struct ContentView: View {
     @State private var user: User? = UserDefaultsManager.loadUser()
 
     // Kullanıcı id'si (email veya guest)
     @State private var userId: String = UserDefaultsManager.loadUser()?.isGuest == true ? "guest" : (UserDefaultsManager.loadUser()?.email ?? "guest")
 
-    @State private var incomes: [Income] = UserDefaultsManager.loadIncomes(forUser: UserDefaultsManager.loadUser()?.isGuest == true ? "guest" : (UserDefaultsManager.loadUser()?.email ?? "guest"))
-    @State private var expenses: [Expense] = UserDefaultsManager.loadExpenses(forUser: UserDefaultsManager.loadUser()?.isGuest == true ? "guest" : (UserDefaultsManager.loadUser()?.email ?? "guest"))
+    @State private var incomes: [Income] = []
+    @State private var expenses: [Expense] = []
     @State private var showProfileSheet = false
     @State private var currentUser: User? = UserDefaultsManager.loadUser()
     @State private var showAuthSheet: Bool = false // do not force auth on launch
@@ -20,45 +22,6 @@ struct ContentView: View {
     @State private var showAuthentication: Bool = false
     @State private var selectedTab = 2 // Summary as default tab
 
-    var incomesTab: some View {
-        NavigationStack {
-            IncomesView(incomes: $incomes, userId: $userId)
-                .navigationTitle("Incomes".localized)
-        }
-        .tabItem {
-            Label("Incomes".localized, systemImage: "arrow.up.circle")
-        }
-        .tag(0)
-    }
-    var expensesTab: some View {
-        NavigationStack {
-            ExpensesView(expenses: $expenses, userId: $userId)
-                .navigationTitle("Expenses".localized)
-        }
-        .tabItem {
-            Label("Expenses".localized, systemImage: "arrow.down.circle")
-        }
-        .tag(1)
-    }
-    var summaryTab: some View {
-        NavigationStack {
-            SummaryView(incomes: $incomes, expenses: $expenses)
-                .navigationTitle("Summary".localized)
-        }
-        .tabItem {
-            Label("Summary".localized, systemImage: "chart.pie")
-        }
-        .tag(2)
-    }
-    var settingsTab: some View {
-        NavigationStack {
-            ProfileSettingsView(user: $user, isAuthSheetPresented: $showAuthSheet)
-        }
-        .tabItem {
-            Label("Settings".localized, systemImage: "gearshape")
-        }
-        .tag(3)
-    }
 
     var body: some View {
         Group {
@@ -67,12 +30,16 @@ struct ContentView: View {
                     securityManager.isAuthenticated = true
                 }
             } else {
-                TabView(selection: $selectedTab) {
-                    incomesTab
-                    expensesTab
-                    summaryTab
-                    settingsTab
-                }
+                AnimatedTabView(
+                    selectedTab: $selectedTab,
+                    incomes: $incomes,
+                    expenses: $expenses,
+                    user: $user,
+                    userId: $userId,
+                    showAuthSheet: $showAuthSheet
+                )
+                .errorHandling()
+                .performanceToast()
                 .sheet(isPresented: $showAuthSheet) {
                     LoginOrRegisterView(user: $user, isPresented: $showAuthSheet)
                 }
@@ -84,6 +51,11 @@ struct ContentView: View {
             user = UserDefaultsManager.loadUser()
             if UserDefaultsManager.loadSecurityType() != .none {
                 securityManager.isAuthenticated = false
+            }
+            
+            // Load data lazily
+            Task {
+                await loadInitialData()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .userDidLogin)) { _ in
@@ -124,6 +96,48 @@ struct ContentView: View {
         }
         .onChange(of: expenses) { newExpenses in
             UserDefaultsManager.saveExpenses(newExpenses, forUser: userId)
+        }
+    }
+    
+    @MainActor
+    private func loadInitialData() async {
+        let currentUserId = (user?.isGuest == true) ? "guest" : (user?.email ?? "guest")
+        
+        do {
+            // Load data in background to avoid blocking UI
+            await withTaskGroup(of: Void.self) { group in
+                group.addTask {
+                    do {
+                        let loadedIncomes = UserDefaultsManager.loadIncomes(forUser: currentUserId)
+                        await MainActor.run {
+                            self.incomes = loadedIncomes
+                        }
+                    } catch {
+                        await MainActor.run {
+                            ErrorHandler.shared.handle(
+                                AppError.dataCorruption("Failed to load incomes: \(error.localizedDescription)"),
+                                context: "loadInitialData"
+                            )
+                        }
+                    }
+                }
+                
+                group.addTask {
+                    do {
+                        let loadedExpenses = UserDefaultsManager.loadExpenses(forUser: currentUserId)
+                        await MainActor.run {
+                            self.expenses = loadedExpenses
+                        }
+                    } catch {
+                        await MainActor.run {
+                            ErrorHandler.shared.handle(
+                                AppError.dataCorruption("Failed to load expenses: \(error.localizedDescription)"),
+                                context: "loadInitialData"
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 
