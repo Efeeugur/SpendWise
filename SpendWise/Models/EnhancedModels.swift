@@ -45,30 +45,7 @@ struct UserProfile: Identifiable, Codable, Equatable {
         case lastLoginAt = "last_login_at"
     }
     
-    // Convert from existing User model
-    init(from user: User) {
-        self.id = user.id
-        self.email = user.email
-        self.fullName = user.name
-        self.displayName = user.name
-        self.avatarUrl = nil
-        self.avatarData = user.avatarData
-        self.isGuest = user.isGuest
-        self.isActive = true
-        self.createdAt = Date()
-        self.updatedAt = Date()
-        self.lastLoginAt = nil
-    }
-    
-    // Convert to existing User model
-    func toLegacyUser() -> User {
-        return User(
-            email: self.email,
-            name: self.fullName ?? self.displayName,
-            isGuest: self.isGuest,
-            avatarData: self.avatarData
-        )
-    }
+
 }
 
 // MARK: - App Theme Preferences
@@ -200,24 +177,7 @@ struct EnhancedCategory: Identifiable, Codable, Equatable {
         case updatedAt = "updated_at"
     }
     
-    // Convert from existing category enums
-    static func fromIncomeCategory(_ category: IncomeCategory, userId: UUID) -> EnhancedCategory {
-        return EnhancedCategory(
-            userId: userId,
-            name: category.rawValue,
-            type: .income,
-            isDefault: true
-        )
-    }
-    
-    static func fromExpenseCategory(_ category: ExpenseCategory, userId: UUID) -> EnhancedCategory {
-        return EnhancedCategory(
-            userId: userId,
-            name: category.rawValue,
-            type: .expense,
-            isDefault: true
-        )
-    }
+
 }
 
 // MARK: - Transaction Types
@@ -297,88 +257,7 @@ struct EnhancedTransaction: Identifiable, Codable, Equatable {
         case deletedAt = "deleted_at"
     }
     
-    // Convert from existing Income model
-    init(from income: Income, userId: UUID, categoryId: UUID? = nil) {
-        self.id = income.id
-        self.userId = userId
-        self.categoryId = categoryId
-        self.title = income.title
-        self.description = nil
-        self.amount = income.amount
-        self.currency = income.currency
-        self.transactionType = .income
-        self.expenseType = nil
-        self.transactionDate = income.date
-        self.location = nil
-        self.note = income.note
-        self.photoUrls = []
-        self.photoData = income.photoData
-        self.tags = []
-        self.isRecurring = false
-        self.parentTransactionId = nil
-        self.isDeleted = false
-        self.createdAt = Date()
-        self.updatedAt = Date()
-        self.deletedAt = nil
-    }
-    
-    // Convert from existing Expense model
-    init(from expense: Expense, userId: UUID, categoryId: UUID? = nil) {
-        self.id = expense.id
-        self.userId = userId
-        self.categoryId = categoryId
-        self.title = expense.title
-        self.description = nil
-        self.amount = expense.amount
-        self.currency = expense.currency
-        self.transactionType = .expense
-        self.expenseType = expense.type
-        self.transactionDate = expense.date
-        self.location = nil
-        self.note = expense.note
-        self.photoUrls = []
-        self.photoData = expense.photoData
-        self.tags = []
-        self.isRecurring = false
-        self.parentTransactionId = nil
-        self.isDeleted = false
-        self.createdAt = Date()
-        self.updatedAt = Date()
-        self.deletedAt = nil
-    }
-    
-    // Convert to existing Income model
-    func toLegacyIncome() -> Income? {
-        guard transactionType == .income else { return nil }
-        
-        return Income(
-            id: self.id,
-            title: self.title,
-            date: self.transactionDate,
-            amount: self.amount,
-            category: .other, // Default category, should be mapped properly
-            currency: self.currency,
-            note: self.note,
-            photoData: self.photoData
-        )
-    }
-    
-    // Convert to existing Expense model
-    func toLegacyExpense() -> Expense? {
-        guard transactionType == .expense else { return nil }
-        
-        return Expense(
-            id: self.id,
-            title: self.title,
-            date: self.transactionDate,
-            amount: self.amount,
-            type: self.expenseType ?? .oneTime,
-            category: .other, // Default category, should be mapped properly
-            currency: self.currency,
-            note: self.note,
-            photoData: self.photoData
-        )
-    }
+
 }
 
 // MARK: - Budget Period Types
@@ -588,5 +467,38 @@ struct UserNotification: Identifiable, Codable {
         case readAt = "read_at"
         case expiresAt = "expires_at"
         case createdAt = "created_at"
+    }
+}
+
+// MARK: - Analytics Support Models
+struct TransactionSummary: Codable {
+    let totalIncome: Double
+    let totalExpenses: Double
+    let netAmount: Double
+    let transactionCount: Int
+    let currency: Currency
+    
+    enum CodingKeys: String, CodingKey {
+        case totalIncome = "total_income"
+        case totalExpenses = "total_expenses"
+        case netAmount = "net_amount"
+        case transactionCount = "transaction_count"
+        case currency
+    }
+}
+
+struct CategorySpendingSummary: Codable {
+    let categoryName: String
+    let categoryType: CategoryType
+    let totalAmount: Double
+    let transactionCount: Int
+    let currency: Currency
+    
+    enum CodingKeys: String, CodingKey {
+        case categoryName = "category_name"
+        case categoryType = "category_type"
+        case totalAmount = "total_amount"
+        case transactionCount = "transaction_count"
+        case currency
     }
 }

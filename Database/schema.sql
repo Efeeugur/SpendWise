@@ -242,12 +242,12 @@ CREATE TABLE notifications (
     read_at TIMESTAMP WITH TIME ZONE,
     expires_at TIMESTAMP WITH TIME ZONE,
     
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    
-    -- Indexes for performance
-    INDEX idx_notifications_user_unread (user_id, is_read, created_at DESC),
-    INDEX idx_notifications_scheduled (scheduled_at) WHERE scheduled_at IS NOT NULL AND is_sent = FALSE
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Indexes for notifications
+CREATE INDEX idx_notifications_user_unread ON notifications(user_id, is_read, created_at DESC);
+CREATE INDEX idx_notifications_scheduled ON notifications(scheduled_at) WHERE scheduled_at IS NOT NULL AND is_sent = FALSE;
 
 -- User sessions table - Track user sessions and devices
 CREATE TABLE user_sessions (
@@ -267,11 +267,12 @@ CREATE TABLE user_sessions (
     
     -- Status
     is_active BOOLEAN DEFAULT TRUE,
-    revoked_at TIMESTAMP WITH TIME ZONE,
-    
-    INDEX idx_sessions_user_active (user_id, is_active, expires_at),
-    INDEX idx_sessions_cleanup (expires_at) WHERE is_active = TRUE
+    revoked_at TIMESTAMP WITH TIME ZONE
 );
+
+-- Indexes for user_sessions
+CREATE INDEX idx_sessions_user_active ON user_sessions(user_id, is_active, expires_at);
+CREATE INDEX idx_sessions_cleanup ON user_sessions(expires_at) WHERE is_active = TRUE;
 
 -- Audit log table - Track all data changes
 CREATE TABLE audit_logs (
@@ -293,12 +294,17 @@ CREATE TABLE audit_logs (
     ip_address INET,
     user_agent TEXT,
     
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    
-    -- Indexes for performance
-    INDEX idx_audit_logs_user_table (user_id, table_name, created_at DESC),
-    INDEX idx_audit_logs_record (table_name, record_id, created_at DESC)
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Indexes for audit_logs
+CREATE INDEX idx_audit_logs_user_table ON audit_logs(user_id, table_name, created_at DESC);
+CREATE INDEX idx_audit_logs_record ON audit_logs(table_name, record_id, created_at DESC);
+
+-- System user for default category templates
+INSERT INTO users (id, email, full_name, is_guest, is_active)
+VALUES ('00000000-0000-0000-0000-000000000000', 'system@spendwise.internal', 'System', FALSE, FALSE)
+ON CONFLICT (id) DO NOTHING;
 
 -- Insert default categories
 INSERT INTO categories (user_id, name, type, is_default, sort_order) VALUES

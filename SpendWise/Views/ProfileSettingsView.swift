@@ -2,6 +2,7 @@ import SwiftUI
 import Combine
 import UIKit
 import PhotosUI
+import StoreKit
 
 struct ProfileSettingsView: View {
     @Environment(\.dismiss) var dismiss
@@ -143,7 +144,7 @@ struct ProfileSettingsView: View {
                                 Text("\(currency.rawValue) (\(currency.symbol))").tag(currency)
                             }
                         }
-                        .onChange(of: defaultCurrency) { newValue in
+                        .onChange(of: defaultCurrency) { _, newValue in
                             UserDefaultsManager.saveDefaultCurrency(newValue)
                         }
                     }
@@ -164,7 +165,7 @@ struct ProfileSettingsView: View {
                             }
                         }
                     }
-                    .onChange(of: recommendationsEnabled) { newValue in
+                    .onChange(of: recommendationsEnabled) { _, newValue in
                         UserDefaultsManager.saveRecommendationsEnabled(newValue)
                     }
                     
@@ -229,7 +230,9 @@ struct ProfileSettingsView: View {
                 Section(header: Text("Reports".localized)) {
                     // Export Data
                     Button {
-                        // TODO: Implement export functionality
+                        let incomes = UserDefaultsManager.loadIncomes(forUser: userId)
+                        let expenses = UserDefaultsManager.loadExpenses(forUser: userId)
+                        ExportManager.shared.exportCSV(incomes: incomes, expenses: expenses)
                     } label: {
                         HStack {
                             Image(systemName: "square.and.arrow.up")
@@ -250,7 +253,9 @@ struct ProfileSettingsView: View {
                 Section(header: Text("Support".localized)) {
                     // Help & FAQ
                     Button {
-                        // TODO: Implement help/FAQ
+                        if let url = URL(string: "mailto:support@spendwise.app?subject=SpendWise%20Help") {
+                            UIApplication.shared.open(url)
+                        }
                     } label: {
                         HStack {
                             Image(systemName: "questionmark.circle")
@@ -268,7 +273,9 @@ struct ProfileSettingsView: View {
                     
                     // Rate App
                     Button {
-                        // TODO: Implement rate app functionality
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                            AppStore.requestReview(in: windowScene)
+                        }
                     } label: {
                         HStack {
                             Image(systemName: "star")
@@ -374,10 +381,9 @@ struct AccountSheetView: View {
         return formatter
     }
     
-    // Placeholder date - could be enhanced to track actual registration date
+    // Use actual registration date from UserDefaults
     private var memberSinceDate: Date {
-        // For demo purposes, using a static date
-        Calendar.current.date(byAdding: .month, value: -6, to: Date()) ?? Date()
+        UserDefaultsManager.loadRegistrationDate() ?? Date()
     }
 
     var body: some View {
@@ -605,7 +611,7 @@ struct AccountSheetView: View {
         } message: {
             Text("Are you sure you want to permanently delete your account? This action cannot be undone.".localized)
         }
-        .onChange(of: avatarItem) { newItem in
+        .onChange(of: avatarItem) { _, newItem in
             guard let newItem else { return }
             Task {
                 if let data = try? await newItem.loadTransferable(type: Data.self) {

@@ -15,6 +15,6 @@ struct User: Codable, Equatable {
         self.avatarData = avatarData
     }
     static func == (lhs: User, rhs: User) -> Bool {
-        return lhs.email == rhs.email && lhs.name == rhs.name && lhs.isGuest == rhs.isGuest && lhs.avatarData == rhs.avatarData
+        return lhs.id == rhs.id && lhs.email == rhs.email && lhs.name == rhs.name && lhs.isGuest == rhs.isGuest && lhs.avatarData == rhs.avatarData
     }
 } 

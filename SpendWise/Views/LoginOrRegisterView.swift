@@ -230,19 +230,18 @@ struct LoginOrRegisterView: View {
                         
                             // Enhanced social login section
                             VStack(spacing: 12) {
-                                // Apple Sign In with enhanced styling
+                                // Apple Sign In with real credential handling
                                 SignInWithAppleButton(.signIn) { request in
-                                    // Configure request if needed
+                                    request.requestedScopes = [.fullName, .email]
                                 } onCompletion: { result in
-                                    // Handle completion placeholder
-                                    handleSocialLogin("Apple")
+                                    handleAppleSignIn(result: result)
                                 }
                                 .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
                                 .frame(height: 50)
                                 .cornerRadius(12)
                                 
                                 // Enhanced Google Sign In
-                                Button(action: { handleSocialLogin("Google") }) {
+                                Button(action: { errorMessage = "Google Sign-In requires Google SDK integration" }) {
                                     HStack(spacing: 12) {
                                         Image(systemName: "globe")
                                             .font(.system(size: 18))
@@ -308,6 +307,7 @@ struct LoginOrRegisterView: View {
                     let newUser = User(email: loggedEmail, name: userName, isGuest: false)
                     self.user = newUser
                     UserDefaultsManager.saveUser(newUser)
+                    UserDefaultsManager.saveRegistrationDateIfNeeded()
                     
                     // Post notification that user logged in
                     NotificationCenter.default.post(name: .userDidLogin, object: nil)
@@ -324,7 +324,29 @@ struct LoginOrRegisterView: View {
         }
     }
     
-    private func handleSocialLogin(_ provider: String) { errorMessage = "\(provider) Sign-In not yet configured" }
+    private func handleAppleSignIn(result: Result<ASAuthorization, Error>) {
+        switch result {
+        case .success(let authorization):
+            if let credential = authorization.credential as? ASAuthorizationAppleIDCredential {
+                let appleUserId = credential.user
+                let email = credential.email ?? "\(appleUserId.prefix(8))@apple.id"
+                let fullName = [credential.fullName?.givenName, credential.fullName?.familyName]
+                    .compactMap { $0 }
+                    .joined(separator: " ")
+                let displayName = fullName.isEmpty ? email.components(separatedBy: "@").first?.capitalized ?? "User" : fullName
+                
+                let newUser = User(email: email, name: displayName, isGuest: false)
+                self.user = newUser
+                UserDefaultsManager.saveUser(newUser)
+                UserDefaultsManager.saveRegistrationDateIfNeeded()
+                
+                NotificationCenter.default.post(name: .userDidLogin, object: nil)
+                self.isPresented = false
+            }
+        case .failure(let error):
+            errorMessage = "Apple Sign-In failed: \(error.localizedDescription)"
+        }
+    }
 }
 
 // MARK: - Custom Styles

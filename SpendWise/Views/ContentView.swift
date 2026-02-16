@@ -76,7 +76,7 @@ struct ContentView: View {
                 UserDefaultsManager.setClearGuestOnLaunch(true)
             }
         }
-        .onChange(of: user ?? User(isGuest: true)) { newUser in
+        .onChange(of: user ?? User(isGuest: true)) { _, newUser in
             let newId = (newUser.isGuest == true) ? "guest" : (newUser.email ?? "guest")
             userId = newId
             
@@ -91,10 +91,10 @@ struct ContentView: View {
                 expenses = UserDefaultsManager.loadExpenses(forUser: newId)
             }
         }
-        .onChange(of: incomes) { newIncomes in
+        .onChange(of: incomes) { _, newIncomes in
             UserDefaultsManager.saveIncomes(newIncomes, forUser: userId)
         }
-        .onChange(of: expenses) { newExpenses in
+        .onChange(of: expenses) { _, newExpenses in
             UserDefaultsManager.saveExpenses(newExpenses, forUser: userId)
         }
     }
@@ -103,39 +103,19 @@ struct ContentView: View {
     private func loadInitialData() async {
         let currentUserId = (user?.isGuest == true) ? "guest" : (user?.email ?? "guest")
         
-        do {
-            // Load data in background to avoid blocking UI
-            await withTaskGroup(of: Void.self) { group in
-                group.addTask {
-                    do {
-                        let loadedIncomes = UserDefaultsManager.loadIncomes(forUser: currentUserId)
-                        await MainActor.run {
-                            self.incomes = loadedIncomes
-                        }
-                    } catch {
-                        await MainActor.run {
-                            ErrorHandler.shared.handle(
-                                AppError.dataCorruption("Failed to load incomes: \(error.localizedDescription)"),
-                                context: "loadInitialData"
-                            )
-                        }
-                    }
+        // Load data in background to avoid blocking UI
+        await withTaskGroup(of: Void.self) { group in
+            group.addTask {
+                let loadedIncomes = UserDefaultsManager.loadIncomes(forUser: currentUserId)
+                await MainActor.run {
+                    self.incomes = loadedIncomes
                 }
-                
-                group.addTask {
-                    do {
-                        let loadedExpenses = UserDefaultsManager.loadExpenses(forUser: currentUserId)
-                        await MainActor.run {
-                            self.expenses = loadedExpenses
-                        }
-                    } catch {
-                        await MainActor.run {
-                            ErrorHandler.shared.handle(
-                                AppError.dataCorruption("Failed to load expenses: \(error.localizedDescription)"),
-                                context: "loadInitialData"
-                            )
-                        }
-                    }
+            }
+            
+            group.addTask {
+                let loadedExpenses = UserDefaultsManager.loadExpenses(forUser: currentUserId)
+                await MainActor.run {
+                    self.expenses = loadedExpenses
                 }
             }
         }

@@ -67,7 +67,7 @@ class SecurityManager: ObservableObject {
     func authenticateWithPassword(_ password: String, completion: @escaping (Bool) -> Void) {
         let savedPassword = UserDefaultsManager.loadSecurityPassword()
         
-        if password == savedPassword {
+        if password.sha256() == savedPassword {
             isAuthenticated = true
             completion(true)
         } else {

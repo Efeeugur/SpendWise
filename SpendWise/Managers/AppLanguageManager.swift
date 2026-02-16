@@ -10,13 +10,14 @@ class AppLanguageManager: ObservableObject {
             objectWillChange.send()
         }
     }
-    let supportedLanguages = ["en"]
-    let languageDisplayNames = ["en": "English"]
+    let supportedLanguages = ["en", "tr"]
+    let languageDisplayNames = ["en": "English", "tr": "Türkçe"]
 
     private init() {
-        // Force app language to English
-        self.selectedLanguage = "en"
-        Bundle.setLanguage("en")
+        // Load saved language or default to English
+        let saved = UserDefaults.standard.string(forKey: "AppLanguage") ?? "en"
+        self.selectedLanguage = saved
+        Bundle.setLanguage(saved)
     }
 }
 

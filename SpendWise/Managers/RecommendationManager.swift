@@ -254,7 +254,6 @@ class RecommendationManager: ObservableObject {
         let threeMonthsAgo = calendar.date(byAdding: .month, value: -3, to: now) ?? now
         
         let recentExpenses = expenses.filter { $0.date >= threeMonthsAgo }
-        _ = incomes.filter { $0.date >= threeMonthsAgo }
         
         if recentExpenses.count > 5 {
             let avgMonthlyExpense = recentExpenses.reduce(0) { $0 + $1.amount } / 3

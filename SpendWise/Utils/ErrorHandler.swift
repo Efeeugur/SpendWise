@@ -167,7 +167,7 @@ struct PerformanceToast: ViewModifier {
                 .padding(.top, 50)
                 , alignment: .top
             )
-            .onChange(of: performanceManager.isOptimizedMode) { isOptimized in
+            .onChange(of: performanceManager.isOptimizedMode) { _, isOptimized in
                 if isOptimized {
                     withAnimation(.easeInOut) {
                         showToast = true

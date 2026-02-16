@@ -69,31 +69,31 @@ struct UserDefaultsManager {
         return value > 0 ? value : nil
     }
     
-    // iCloud'a gelirleri kaydet
-    static func saveIncomesToiCloud(_ incomes: [Income]) {
+    // iCloud'a gelirleri kaydet (userId-scoped)
+    static func saveIncomesToiCloud(_ incomes: [Income], forUser userId: String) {
         if let encoded = try? JSONEncoder().encode(incomes) {
-            iCloudStore.set(encoded, forKey: "incomesKey") // Bu kısım düzeltilecek, userId'ye göre olmalı
+            iCloudStore.set(encoded, forKey: "incomes_\(userId)")
             iCloudStore.synchronize()
         }
     }
-    // iCloud'dan gelirleri yükle
-    static func loadIncomesFromiCloud() -> [Income] {
-        if let data = iCloudStore.data(forKey: "incomesKey"), // Bu kısım düzeltilecek, userId'ye göre olmalı
+    // iCloud'dan gelirleri yükle (userId-scoped)
+    static func loadIncomesFromiCloud(forUser userId: String) -> [Income] {
+        if let data = iCloudStore.data(forKey: "incomes_\(userId)"),
            let decoded = try? JSONDecoder().decode([Income].self, from: data) {
             return decoded
         }
         return []
     }
-    // iCloud'a giderleri kaydet
-    static func saveExpensesToiCloud(_ expenses: [Expense]) {
+    // iCloud'a giderleri kaydet (userId-scoped)
+    static func saveExpensesToiCloud(_ expenses: [Expense], forUser userId: String) {
         if let encoded = try? JSONEncoder().encode(expenses) {
-            iCloudStore.set(encoded, forKey: "expensesKey") // Bu kısım düzeltilecek, userId'ye göre olmalı
+            iCloudStore.set(encoded, forKey: "expenses_\(userId)")
             iCloudStore.synchronize()
         }
     }
-    // iCloud'dan giderleri yükle
-    static func loadExpensesFromiCloud() -> [Expense] {
-        if let data = iCloudStore.data(forKey: "expensesKey"), // Bu kısım düzeltilecek, userId'ye göre olmalı
+    // iCloud'dan giderleri yükle (userId-scoped)
+    static func loadExpensesFromiCloud(forUser userId: String) -> [Expense] {
+        if let data = iCloudStore.data(forKey: "expenses_\(userId)"),
            let decoded = try? JSONDecoder().decode([Expense].self, from: data) {
             return decoded
         }
@@ -126,9 +126,9 @@ struct UserDefaultsManager {
     }
     
     enum AppTheme: String, Codable, CaseIterable {
-        case system = "Sistem Varsayılanı"
-        case light = "Açık"
-        case dark = "Koyu"
+        case system = "System"
+        case light = "Light"
+        case dark = "Dark"
     }
     private static let appThemeKey = "appTheme"
     static func saveAppTheme(_ theme: AppTheme) {
@@ -245,5 +245,20 @@ struct UserDefaultsManager {
     }
     static func shouldClearGuestOnLaunch() -> Bool {
         UserDefaults.standard.bool(forKey: clearGuestOnLaunchKey)
+    }
+    
+    // MARK: - Registration Date
+    private static let registrationDateKey = "registrationDate"
+    
+    /// Saves the registration date (only if not already set)
+    static func saveRegistrationDateIfNeeded() {
+        if UserDefaults.standard.object(forKey: registrationDateKey) == nil {
+            UserDefaults.standard.set(Date(), forKey: registrationDateKey)
+        }
+    }
+    
+    /// Loads the registration date, or returns nil if not set
+    static func loadRegistrationDate() -> Date? {
+        UserDefaults.standard.object(forKey: registrationDateKey) as? Date
     }
 }

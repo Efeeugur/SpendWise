@@ -169,7 +169,7 @@ struct SplashView: View {
                     .padding(.bottom, 32)
                     
                     // Copyright
-                    Text("© 2024 SpendWise. All rights reserved.")
+                    Text("© 2025 SpendWise. All rights reserved.")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                         .opacity(copyrightOpacity)
