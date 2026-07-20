@@ -3,6 +3,9 @@
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
 # Secrets and configuration
+.env
+.env.*
+*.xcuserstate
 Secrets.xcconfig
 *.xcconfig.local
 
