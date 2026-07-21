@@ -85,7 +85,7 @@ struct PasswordSetupView: View {
 
 // MARK: - Main Security View
 struct SecurityView: View {
-    @StateObject private var securityManager = SecurityManager.shared
+    @ObservedObject private var securityManager = SecurityManager.shared
     @Environment(\.dismiss) var dismiss
     @State private var selectedSecurityType: SecurityType = UserDefaultsManager.loadSecurityType()
     @State private var password: String = ""
