@@ -10,7 +10,7 @@ struct ExpensesView: View {
     @State private var expenseToEdit: Expense? = nil
     @State private var isLoading: Bool = false
     @State private var selectedFilter: ExpenseFilter = .all
-    @StateObject private var currencyManager = CurrencyManager.shared
+    @ObservedObject private var currencyManager = CurrencyManager.shared
     
     private var selectedDisplayCurrency: Currency { 
         UserDefaultsManager.loadDefaultCurrency() 
@@ -257,14 +257,6 @@ struct ExpensesView: View {
     }
     
     private var filteredExpenses: [Expense] {
-        // Cache expensive computations
-        let cacheKey = "\(expenses.count)-\(selectedFilter)-\(searchText)"
-        
-        // Simple memoization for performance
-        if let cached = filteredExpensesCache[cacheKey] {
-            return cached
-        }
-        
         var filtered = expenses
         
         // Apply filter selection
@@ -287,21 +279,8 @@ struct ExpensesView: View {
             filtered = filtered.filter { $0.title.lowercased().contains(lowercaseSearch) }
         }
         
-        let result = filtered.sorted { $0.date > $1.date }
-        
-        // Cache result
-        filteredExpensesCache[cacheKey] = result
-        
-        // Clean cache if it gets too large
-        if filteredExpensesCache.count > 10 {
-            filteredExpensesCache.removeAll()
-            filteredExpensesCache[cacheKey] = result
-        }
-        
-        return result
+        return filtered.sorted { $0.date > $1.date }
     }
-    
-    @State private var filteredExpensesCache: [String: [Expense]] = [:]
 
     // MARK: - Actions
     private func deleteExpense(_ expense: Expense) {
@@ -411,7 +390,7 @@ struct ExpenseCard: View {
     let expense: Expense
     let onTap: () -> Void
     let onDelete: () -> Void
-    @StateObject private var currencyManager = CurrencyManager.shared
+    @ObservedObject private var currencyManager = CurrencyManager.shared
     @State private var showingDeleteAlert = false
     
     var body: some View {

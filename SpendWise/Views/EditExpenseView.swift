@@ -44,7 +44,7 @@ struct EditExpenseView: View {
     }
     
     private var isFormValid: Bool {
-        !newTitle.isEmpty && !amountString.isEmpty && Double(amountString) != nil
+        !newTitle.isEmpty && !amountString.isEmpty && amountString.toLocalizedDouble() != nil
     }
     
     var body: some View {
@@ -170,7 +170,7 @@ struct EditExpenseView: View {
                     .keyboardType(.decimalPad)
                     .textFieldStyle(EditExpenseTextFieldStyle())
                     .onChange(of: amountString) { _, newValue in
-                        if let amount = Double(newValue) {
+                        if let amount = newValue.toLocalizedDouble() {
                             newAmount = amount
                         }
                     }
@@ -360,7 +360,7 @@ struct EditExpenseView: View {
     
     // MARK: - Actions
     private func saveExpense() {
-        guard let amountDouble = Double(amountString), !newTitle.isEmpty else { return }
+        guard let amountDouble = amountString.toLocalizedDouble(), !newTitle.isEmpty else { return }
         
         if let index = expenses.firstIndex(where: { $0.id == expense.id }) {
             let photoData = newPhoto?.jpegData(compressionQuality: 0.7)

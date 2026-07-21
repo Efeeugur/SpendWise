@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct RecommendationsView: View {
-    @StateObject private var recommendationManager = RecommendationManager.shared
+    @ObservedObject private var recommendationManager = RecommendationManager.shared
     @Binding var incomes: [Income]
     @Binding var expenses: [Expense]
     @Environment(\.dismiss) var dismiss

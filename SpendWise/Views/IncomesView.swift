@@ -8,7 +8,7 @@ struct IncomesView: View {
     @State private var incomeToEdit: Income? = nil
     @State private var isLoading: Bool = false
     @State private var selectedFilter: IncomeFilter = .all
-    @StateObject private var currencyManager = CurrencyManager.shared
+    @ObservedObject private var currencyManager = CurrencyManager.shared
     
     private var selectedDisplayCurrency: Currency { 
         UserDefaultsManager.loadDefaultCurrency() 
@@ -348,7 +348,7 @@ struct IncomeCard: View {
     let income: Income
     let onTap: () -> Void
     let onDelete: () -> Void
-    @StateObject private var currencyManager = CurrencyManager.shared
+    @ObservedObject private var currencyManager = CurrencyManager.shared
     @State private var showingDeleteAlert = false
     
     var body: some View {
