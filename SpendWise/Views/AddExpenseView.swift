@@ -5,7 +5,7 @@ struct AddExpenseView: View {
     @Binding var expenses: [Expense]
     var userEmail: String? = nil
     @Environment(\.dismiss) var dismiss
-    @StateObject private var currencyManager = CurrencyManager.shared
+    @ObservedObject private var currencyManager = CurrencyManager.shared
     @State private var title: String = ""
     @State private var date: Date = Date()
     @State private var amount: String = ""
@@ -19,7 +19,7 @@ struct AddExpenseView: View {
     @State private var selectedPhoto: PhotosPickerItem?
     
     private var isFormValid: Bool {
-        !title.isEmpty && !amount.isEmpty && Double(amount) != nil
+        !title.isEmpty && !amount.isEmpty && amount.toLocalizedDouble() != nil
     }
 
     var body: some View {
@@ -352,7 +352,7 @@ struct AddExpenseView: View {
     
     // MARK: - Actions
     private func saveExpense() {
-        guard let amountDouble = Double(amount), !title.isEmpty else { return }
+        guard let amountDouble = amount.toLocalizedDouble(), !title.isEmpty else { return }
         
         let photoData = selectedImage?.jpegData(compressionQuality: 0.7)
         let newExpense = Expense(

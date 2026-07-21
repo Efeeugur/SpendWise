@@ -4,7 +4,7 @@ import Charts
 struct SummaryView: View {
     @Binding var incomes: [Income]
     @Binding var expenses: [Expense]
-    @StateObject private var currencyManager = CurrencyManager.shared
+    @ObservedObject private var currencyManager = CurrencyManager.shared
     private var selectedDisplayCurrency: Currency { UserDefaultsManager.loadDefaultCurrency() }
 
     var body: some View {
