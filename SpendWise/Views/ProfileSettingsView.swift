@@ -181,7 +181,7 @@ struct ProfileSettingsView: View {
                             .multilineTextAlignment(.trailing)
                             .frame(width: 80)
                         Button(action: {
-                            if let limit = Double(monthlyLimitText.replacingOccurrences(of: ",", with: ".")) {
+                            if let limit = monthlyLimitText.toLocalizedDouble(), limit > 0 {
                                 UserDefaultsManager.saveMonthlyLimit(limit)
                                 showLimitSaved = true
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
