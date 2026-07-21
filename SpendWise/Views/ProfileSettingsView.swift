@@ -297,7 +297,7 @@ struct ProfileSettingsView: View {
                     HStack {
                         Text("Version".localized)
                         Spacer()
-                        Text("1.0.0")
+                        Text(AppConfig.appVersion)
                             .foregroundColor(.secondary)
                     }
                     
