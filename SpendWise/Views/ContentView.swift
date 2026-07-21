@@ -18,7 +18,7 @@ struct ContentView: View {
     @State private var currentUser: User? = UserDefaultsManager.loadUser()
     @State private var showAuthSheet: Bool = false // do not force auth on launch
 
-    @StateObject private var securityManager = SecurityManager.shared
+    @ObservedObject private var securityManager = SecurityManager.shared
     @State private var showAuthentication: Bool = false
     @State private var selectedTab = 2 // Summary as default tab
 
@@ -66,6 +66,8 @@ struct ContentView: View {
             if UserDefaultsManager.loadSecurityType() != .none {
                 securityManager.logout()
             }
+            // Update last active time for session timeout
+            KeychainManager.updateLastActiveTime()
             // Requirement 2: if not signed in (guest), clear data when leaving app
             if userId == "guest" {
                 incomes = []
@@ -74,6 +76,12 @@ struct ContentView: View {
                 UserDefaultsManager.saveExpenses([], forUser: "guest")
                 UserDefaultsManager.markLastSessionAsGuest(true)
                 UserDefaultsManager.setClearGuestOnLaunch(true)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            // Check session timeout on return from background
+            if UserDefaultsManager.loadSecurityType() != .none {
+                securityManager.checkSessionTimeout()
             }
         }
         .onChange(of: user ?? User(isGuest: true)) { _, newUser in

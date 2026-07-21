@@ -178,22 +178,22 @@ struct UserDefaultsManager {
     }
     
     static func saveSecurityPassword(_ password: String) {
-        // Şifreyi güvenli bir şekilde hash'le (gerçek uygulamada daha güvenli yöntemler kullanılır)
-        let hashedPassword = password.sha256()
-        UserDefaults.standard.set(hashedPassword, forKey: securityPasswordKey)
+        // Delegate to KeychainManager for secure storage with salted SHA-256
+        _ = KeychainManager.savePassword(password)
     }
     
     static func loadSecurityPassword() -> String? {
-        return UserDefaults.standard.string(forKey: securityPasswordKey)
+        // Check if a password exists in Keychain
+        return KeychainManager.hasPassword() ? "exists" : nil
     }
     
     static func clearSecurityPassword() {
-        UserDefaults.standard.removeObject(forKey: securityPasswordKey)
+        KeychainManager.deletePassword()
     }
     
     // Şifreyi ve güvenlik tipini sıfırla
     static func resetSecurityPassword() {
-        UserDefaults.standard.removeObject(forKey: securityPasswordKey)
+        KeychainManager.deletePassword()
         saveSecurityType(.none)
     }
     
