@@ -6,31 +6,52 @@ class ExportManager {
     
     private init() {}
     
-    /// Generates a CSV string from the user's incomes and expenses
+    /// Generates an RFC 4180 compliant CSV string from the user's incomes and expenses
     func generateCSV(incomes: [Income], expenses: [Expense]) -> String {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .short
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm" // ISO-like, locale-independent
         
-        var csv = "Type,Title,Date,Amount,Currency,Category,Note\n"
+        // UTF-8 BOM for Excel compatibility
+        var csv = "\u{FEFF}"
+        csv += "Type,Title,Date,Amount,Currency,Category,Note\n"
         
         // Add incomes
         for income in incomes {
             let date = dateFormatter.string(from: income.date)
-            let note = (income.note ?? "").replacingOccurrences(of: ",", with: ";")
-            let title = income.title.replacingOccurrences(of: ",", with: ";")
-            csv += "Income,\(title),\(date),\(income.amount),\(income.currency.rawValue),\(income.category.rawValue),\(note)\n"
+            let amount = String(format: "%.2f", income.amount) // Locale-independent decimal
+            csv += "Income,"
+            csv += "\(csvEscape(income.title)),"
+            csv += "\(date),"
+            csv += "\(amount),"
+            csv += "\(income.currency.rawValue),"
+            csv += "\(csvEscape(income.category.rawValue)),"
+            csv += "\(csvEscape(income.note ?? ""))\n"
         }
         
         // Add expenses
         for expense in expenses {
             let date = dateFormatter.string(from: expense.date)
-            let note = (expense.note ?? "").replacingOccurrences(of: ",", with: ";")
-            let title = expense.title.replacingOccurrences(of: ",", with: ";")
-            csv += "Expense,\(title),\(date),\(expense.amount),\(expense.currency.rawValue),\(expense.category.rawValue),\(note)\n"
+            let amount = String(format: "%.2f", expense.amount) // Locale-independent decimal
+            csv += "Expense,"
+            csv += "\(csvEscape(expense.title)),"
+            csv += "\(date),"
+            csv += "\(amount),"
+            csv += "\(expense.currency.rawValue),"
+            csv += "\(csvEscape(expense.category.rawValue)),"
+            csv += "\(csvEscape(expense.note ?? ""))\n"
         }
         
         return csv
+    }
+    
+    /// Escapes a CSV field per RFC 4180: wraps in quotes if it contains comma, quote, or newline
+    private func csvEscape(_ field: String) -> String {
+        let needsQuoting = field.contains(",") || field.contains("\"") || field.contains("\n") || field.contains("\r")
+        if needsQuoting {
+            let escaped = field.replacingOccurrences(of: "\"", with: "\"\"")
+            return "\"\(escaped)\""
+        }
+        return field
     }
     
     /// Generates a summary text report
