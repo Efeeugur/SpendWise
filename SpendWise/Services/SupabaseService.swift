@@ -1,7 +1,7 @@
 import Foundation
 
 // Minimal Supabase integration: Auth + REST DB calls
-// Reads configuration from AppConfig (hard-coded) instead of Info.plist per user request
+// Reads configuration from Secrets.xcconfig via Info.plist
 
 final class SupabaseService {
     static let shared = SupabaseService()
@@ -12,6 +12,9 @@ final class SupabaseService {
     private var anonKey: String { AppConfig.supabaseAnonKey }
 
     private func baseUrl(_ path: String) throws -> URL {
+        guard AppConfig.isSupabaseConfigured else {
+            throw SupabaseError.config("Supabase is not configured. Add credentials to Secrets.xcconfig.")
+        }
         guard let url = URL(string: supabaseUrl), ["http","https"].contains(url.scheme?.lowercased()) else {
             throw SupabaseError.config("Invalid SUPABASE_URL")
         }
