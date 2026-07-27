@@ -182,3 +182,26 @@
 "You spent %d more than your average monthly expense this month. Check the trend." = "You spent %d more than your average monthly expense this month. Check the trend.";
 "Spending Decrease" = "Spending Decrease";
 "You spent %d less than your average monthly expense this month. Well done!" = "You spent %d less than your average monthly expense this month. Well done!";
+
+/* Phase 8: Form view strings */
+"Track your spending" = "Track your spending";
+"Expense Name" = "Expense Name";
+"Enter expense name" = "Enter expense name";
+"Amount" = "Amount";
+"Type" = "Type";
+"Category" = "Category";
+"Date" = "Date";
+"Reminder" = "Reminder";
+"Photo" = "Photo";
+"Remove Photo" = "Remove Photo";
+"Add Photo" = "Add Photo";
+"Note" = "Note";
+"Add optional note..." = "Add optional note...";
+"Currency" = "Currency";
+"Track your income sources" = "Track your income sources";
+"Income Name" = "Income Name";
+"Enter income name" = "Enter income name";
+"Update your expense details" = "Update your expense details";
+"Change" = "Change";
+"Remove" = "Remove";
+"Update your income details" = "Update your income details";
