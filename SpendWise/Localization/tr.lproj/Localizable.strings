@@ -132,3 +132,34 @@
 "Dark" = "Koyu";
 "Sign In" = "Giriş Yap";
 "Cancel" = "İptal";
+
+/* Phase 5: Added missing strings */
+"Add Expense" = "Gider Ekle";
+"Add Income" = "Gelir Ekle";
+"Add Reminder" = "Hatırlatıcı Ekle";
+"Delete" = "Sil";
+"Edit Expense" = "Gideri Düzenle";
+"Edit Income" = "Geliri Düzenle";
+"Expense Categories" = "Gider Kategorileri";
+"Expense Limit Exceeded!" = "Harcama Limiti Aşıldı!";
+"Expense Reminder" = "Gider Hatırlatıcısı";
+"Expenses" = "Giderler";
+"Income Categories" = "Gelir Kategorileri";
+"Income vs Expenses" = "Gelir ve Gider";
+"Incomes" = "Gelirler";
+"Net Balance" = "Net Bakiye";
+"No Expenses Yet" = "Henüz Gider Yok";
+"No Income Yet" = "Henüz Gelir Yok";
+"Recent Transactions" = "Son İşlemler";
+"Reminder Date" = "Hatırlatıcı Tarihi";
+"Save" = "Kaydet";
+"Search Expenses" = "Gider Ara";
+"Search Income" = "Gelir Ara";
+"Settings" = "Ayarlar";
+"Spending Analysis" = "Harcama Analizi";
+"Spending Ratio" = "Harcama Oranı";
+"Summary" = "Özet";
+"Total Expenses" = "Toplam Gider";
+"Total Income" = "Toplam Gelir";
+"You have exceeded your monthly expense limit. Total: ₺\\(totalStr) / Limit: ₺\\(limitStr)" = "Aylık harcama limitinizi aştınız. Toplam: ₺\\(totalStr) / Limit: ₺\\(limitStr)";
+"\\(title) payment due!" = "\\(title) ödeme zamanı!";

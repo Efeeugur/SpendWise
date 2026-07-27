@@ -132,3 +132,34 @@
 "Dark" = "Dark";
 "Sign In" = "Sign In";
 "Cancel" = "Cancel";
+
+/* Phase 5: Added missing strings */
+"Add Expense" = "Add Expense";
+"Add Income" = "Add Income";
+"Add Reminder" = "Add Reminder";
+"Delete" = "Delete";
+"Edit Expense" = "Edit Expense";
+"Edit Income" = "Edit Income";
+"Expense Categories" = "Expense Categories";
+"Expense Limit Exceeded!" = "Expense Limit Exceeded!";
+"Expense Reminder" = "Expense Reminder";
+"Expenses" = "Expenses";
+"Income Categories" = "Income Categories";
+"Income vs Expenses" = "Income vs Expenses";
+"Incomes" = "Incomes";
+"Net Balance" = "Net Balance";
+"No Expenses Yet" = "No Expenses Yet";
+"No Income Yet" = "No Income Yet";
+"Recent Transactions" = "Recent Transactions";
+"Reminder Date" = "Reminder Date";
+"Save" = "Save";
+"Search Expenses" = "Search Expenses";
+"Search Income" = "Search Income";
+"Settings" = "Settings";
+"Spending Analysis" = "Spending Analysis";
+"Spending Ratio" = "Spending Ratio";
+"Summary" = "Summary";
+"Total Expenses" = "Total Expenses";
+"Total Income" = "Total Income";
+"You have exceeded your monthly expense limit. Total: ₺\\(totalStr) / Limit: ₺\\(limitStr)" = "You have exceeded your monthly expense limit. Total: ₺\\(totalStr) / Limit: ₺\\(limitStr)";
+"\\(title) payment due!" = "\\(title) payment due!";
