@@ -19,7 +19,9 @@ struct AddExpenseView: View {
     @State private var selectedPhoto: PhotosPickerItem?
     
     private var isFormValid: Bool {
-        !title.isEmpty && !amount.isEmpty && amount.toLocalizedDouble() != nil
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && 
+        !amount.isEmpty && 
+        (amount.toLocalizedDouble() ?? 0) > 0
     }
 
     var body: some View {
@@ -101,7 +103,7 @@ struct AddExpenseView: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                 
-                Text("Track your spending")
+                Text("Track your spending".localized)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -117,13 +119,13 @@ struct AddExpenseView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.red)
                     .frame(width: 20)
-                Text("Expense Name")
+                Text("Expense Name".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
             }
             
-            TextField("Enter expense name", text: $title)
+            TextField("Enter expense name".localized, text: $title)
                 .textFieldStyle(ExpenseTextFieldStyle())
         }
     }
@@ -135,7 +137,7 @@ struct AddExpenseView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.red)
                     .frame(width: 20)
-                Text("Amount")
+                Text("Amount".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -146,7 +148,7 @@ struct AddExpenseView: View {
                     .keyboardType(.decimalPad)
                     .textFieldStyle(ExpenseTextFieldStyle())
                 
-                Picker("Currency", selection: $selectedCurrency) {
+                Picker("Currency".localized, selection: $selectedCurrency) {
                     ForEach(Currency.allCases, id: \.self) { currency in
                         Text(currency.symbol).tag(currency)
                     }
@@ -168,13 +170,13 @@ struct AddExpenseView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.red)
                     .frame(width: 20)
-                Text("Type")
+                Text("Type".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
             }
             
-            Picker("Type", selection: $type) {
+            Picker("Type".localized, selection: $type) {
                 ForEach(ExpenseType.allCases, id: \.self) { expenseType in
                     Text(expenseType.rawValue.localized).tag(expenseType)
                 }
@@ -190,13 +192,13 @@ struct AddExpenseView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.red)
                     .frame(width: 20)
-                Text("Category")
+                Text("Category".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
             }
             
-            Picker("Category", selection: $category) {
+            Picker("Category".localized, selection: $category) {
                 ForEach(ExpenseCategory.allCases, id: \.self) { cat in
                     Text(cat.rawValue.localized).tag(cat)
                 }
@@ -212,7 +214,7 @@ struct AddExpenseView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.red)
                     .frame(width: 20)
-                Text("Date")
+                Text("Date".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -235,7 +237,7 @@ struct AddExpenseView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.red)
                     .frame(width: 20)
-                Text("Reminder")
+                Text("Reminder".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -268,7 +270,7 @@ struct AddExpenseView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.red)
                     .frame(width: 20)
-                Text("Photo")
+                Text("Photo".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -282,7 +284,7 @@ struct AddExpenseView: View {
                         .frame(width: 80, height: 80)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                     
-                    Button("Remove Photo") {
+                    Button("Remove Photo".localized) {
                         selectedImage = nil
                         selectedPhoto = nil
                     }
@@ -300,7 +302,7 @@ struct AddExpenseView: View {
                             .font(.system(size: 28))
                             .foregroundColor(.secondary)
                         
-                        Text("Add Photo")
+                        Text("Add Photo".localized)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -323,7 +325,7 @@ struct AddExpenseView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.red)
                     .frame(width: 20)
-                Text("Note")
+                Text("Note".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -340,7 +342,7 @@ struct AddExpenseView: View {
                     .scrollContentBackground(.hidden)
                 
                 if noteText.isEmpty {
-                    Text("Add optional note...")
+                    Text("Add optional note...".localized)
                         .foregroundColor(.secondary)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 20)
@@ -352,11 +354,12 @@ struct AddExpenseView: View {
     
     // MARK: - Actions
     private func saveExpense() {
-        guard let amountDouble = amount.toLocalizedDouble(), !title.isEmpty else { return }
+        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let amountDouble = amount.toLocalizedDouble(), amountDouble > 0, !trimmedTitle.isEmpty else { return }
         
         let photoData = selectedImage?.jpegData(compressionQuality: 0.7)
         let newExpense = Expense(
-            title: title,
+            title: trimmedTitle,
             date: date,
             amount: amountDouble,
             type: type,
@@ -370,7 +373,9 @@ struct AddExpenseView: View {
             Task {
                 do { 
                     try await SupabaseService.shared.createExpense(email: email, expense: newExpense) 
-                } catch {}
+                } catch {
+                    ErrorHandler.shared.handle(error, context: "SupabaseSync")
+                }
                 expenses.append(newExpense)
                 handleLimitAndReminder(amount: amountDouble, date: date)
                 dismiss()
@@ -390,11 +395,12 @@ struct AddExpenseView: View {
             let totalMonthExpense = expenses.filter {
                 let t = $0.date
                 return Calendar.current.component(.month, from: t) == month && Calendar.current.component(.year, from: t) == year
-            }.reduce(0) { $0 + $1.amount } + amount
+            }.reduce(0) { $0 + currencyManager.convert($1.amount, from: $1.currency, to: selectedCurrency) }
             if totalMonthExpense > limit {
                 let totalStr = String(format: "%.2f", totalMonthExpense)
                 let limitStr = String(format: "%.2f", limit)
-                let body = "You have exceeded your monthly expense limit. Total: ₺\(totalStr) / Limit: ₺\(limitStr)".localized
+                let symbol = selectedCurrency.symbol
+                let body = "You have exceeded your monthly expense limit. Total: \(symbol)\(totalStr) / Limit: \(symbol)\(limitStr)".localized
                 NotificationManager.shared.scheduleNotification(
                     title: "Expense Limit Exceeded!".localized,
                     body: body,

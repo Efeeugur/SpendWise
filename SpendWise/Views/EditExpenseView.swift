@@ -44,7 +44,9 @@ struct EditExpenseView: View {
     }
     
     private var isFormValid: Bool {
-        !newTitle.isEmpty && !amountString.isEmpty && amountString.toLocalizedDouble() != nil
+        !newTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && 
+        !amountString.isEmpty && 
+        (amountString.toLocalizedDouble() ?? 0) > 0
     }
     
     var body: some View {
@@ -125,7 +127,7 @@ struct EditExpenseView: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                 
-                Text("Update your expense details")
+                Text("Update your expense details".localized)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -141,13 +143,13 @@ struct EditExpenseView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.red)
                     .frame(width: 20)
-                Text("Expense Name")
+                Text("Expense Name".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
             }
             
-            TextField("Enter expense name", text: $newTitle)
+            TextField("Enter expense name".localized, text: $newTitle)
                 .textFieldStyle(EditExpenseTextFieldStyle())
         }
     }
@@ -159,7 +161,7 @@ struct EditExpenseView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.red)
                     .frame(width: 20)
-                Text("Amount")
+                Text("Amount".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -175,7 +177,7 @@ struct EditExpenseView: View {
                         }
                     }
                 
-                Picker("Currency", selection: $newCurrency) {
+                Picker("Currency".localized, selection: $newCurrency) {
                     ForEach(Currency.allCases, id: \.self) { currency in
                         Text(currency.symbol).tag(currency)
                     }
@@ -197,13 +199,13 @@ struct EditExpenseView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.red)
                     .frame(width: 20)
-                Text("Type")
+                Text("Type".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
             }
             
-            Picker("Type", selection: $newType) {
+            Picker("Type".localized, selection: $newType) {
                 ForEach(ExpenseType.allCases, id: \.self) { expenseType in
                     Text(expenseType.rawValue.localized).tag(expenseType)
                 }
@@ -219,13 +221,13 @@ struct EditExpenseView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.red)
                     .frame(width: 20)
-                Text("Category")
+                Text("Category".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
             }
             
-            Picker("Category", selection: $newCategory) {
+            Picker("Category".localized, selection: $newCategory) {
                 ForEach(ExpenseCategory.allCases, id: \.self) { cat in
                     Text(cat.rawValue.localized).tag(cat)
                 }
@@ -241,7 +243,7 @@ struct EditExpenseView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.red)
                     .frame(width: 20)
-                Text("Date")
+                Text("Date".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -264,7 +266,7 @@ struct EditExpenseView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.red)
                     .frame(width: 20)
-                Text("Photo")
+                Text("Photo".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -283,13 +285,13 @@ struct EditExpenseView: View {
                             HStack(spacing: 4) {
                                 Image(systemName: "camera.badge.ellipsis")
                                     .font(.caption)
-                                Text("Change")
+                                Text("Change".localized)
                                     .font(.caption)
                             }
                             .foregroundColor(.blue)
                         }
                         
-                        Button("Remove") {
+                        Button("Remove".localized) {
                             newPhoto = nil
                             selectedPhoto = nil
                         }
@@ -308,7 +310,7 @@ struct EditExpenseView: View {
                             .font(.system(size: 28))
                             .foregroundColor(.secondary)
                         
-                        Text("Add Photo")
+                        Text("Add Photo".localized)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -331,7 +333,7 @@ struct EditExpenseView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.red)
                     .frame(width: 20)
-                Text("Note")
+                Text("Note".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -348,7 +350,7 @@ struct EditExpenseView: View {
                     .scrollContentBackground(.hidden)
                 
                 if newNote.isEmpty {
-                    Text("Add optional note...")
+                    Text("Add optional note...".localized)
                         .foregroundColor(.secondary)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 20)

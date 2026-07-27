@@ -182,3 +182,26 @@
 "You spent %d more than your average monthly expense this month. Check the trend." = "Bu ay ortalama aylık harcamanızdan %d daha fazla harcadınız. Eğilimi kontrol edin.";
 "Spending Decrease" = "Harcama Düşüşü";
 "You spent %d less than your average monthly expense this month. Well done!" = "Bu ay ortalama aylık harcamanızdan %d daha az harcadınız. Tebrikler!";
+
+/* Phase 8: Form view strings */
+"Track your spending" = "Harcamalarınızı takip edin";
+"Expense Name" = "Gider Adı";
+"Enter expense name" = "Gider adı girin";
+"Amount" = "Miktar";
+"Type" = "Tür";
+"Category" = "Kategori";
+"Date" = "Tarih";
+"Reminder" = "Hatırlatıcı";
+"Photo" = "Fotoğraf";
+"Remove Photo" = "Fotoğrafı Kaldır";
+"Add Photo" = "Fotoğraf Ekle";
+"Note" = "Not";
+"Add optional note..." = "İsteğe bağlı not ekle...";
+"Currency" = "Para Birimi";
+"Track your income sources" = "Gelir kaynaklarınızı takip edin";
+"Income Name" = "Gelir Adı";
+"Enter income name" = "Gelir adı girin";
+"Update your expense details" = "Gider detaylarınızı güncelleyin";
+"Change" = "Değiştir";
+"Remove" = "Kaldır";
+"Update your income details" = "Gelir detaylarınızı güncelleyin";
