@@ -17,6 +17,9 @@ struct SummaryView: View {
                     // Income vs Expense Chart
                     incomeExpenseChartSection
                     
+                    // Monthly Trend Chart
+                    monthlyTrendSection
+                    
                     // Category Breakdowns
                     categoryBreakdownsSection
                     
@@ -442,8 +445,42 @@ struct SummaryView: View {
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
     }
-
     
+    // MARK: - Monthly Trend Chart
+    private var monthlyTrendSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Monthly Trend".localized)
+                .font(.headline)
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
+            
+            if #available(iOS 16.0, *) {
+                Chart(monthlyData) { item in
+                    BarMark(
+                        x: .value("Month", item.month),
+                        y: .value("Amount", item.amount)
+                    )
+                    .foregroundStyle(item.type == "Income" ? Color.green : Color.red)
+                    .cornerRadius(4)
+                }
+                .chartForegroundStyleScale([
+                    "Income": Color.green,
+                    "Expenses": Color.red
+                ])
+                .chartLegend(position: .bottom)
+                .frame(height: 200)
+            } else {
+                Text("Charts require iOS 16+")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(20)
+        .background(Color(.systemBackground))
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
+    }
+
     // MARK: - Computed Properties
     private var netBalance: Double {
         totalIncomeConverted - totalExpenseConverted
@@ -516,6 +553,34 @@ struct SummaryView: View {
         }
     }
     
+    private var monthlyData: [MonthlyDataPoint] {
+        let calendar = Calendar.current
+        let now = Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM"
+        
+        var data: [MonthlyDataPoint] = []
+        
+        for monthOffset in (0..<6).reversed() {
+            guard let monthDate = calendar.date(byAdding: .month, value: -monthOffset, to: now) else { continue }
+            let month = formatter.string(from: monthDate)
+            let comps = calendar.dateComponents([.year, .month], from: monthDate)
+            
+            let monthIncome = incomes
+                .filter { calendar.dateComponents([.year, .month], from: $0.date) == comps }
+                .reduce(0) { $0 + currencyManager.convert($1.amount, from: $1.currency, to: selectedDisplayCurrency) }
+            
+            let monthExpense = expenses
+                .filter { calendar.dateComponents([.year, .month], from: $0.date) == comps }
+                .reduce(0) { $0 + currencyManager.convert($1.amount, from: $1.currency, to: selectedDisplayCurrency) }
+            
+            data.append(MonthlyDataPoint(month: month, amount: monthIncome, type: "Income"))
+            data.append(MonthlyDataPoint(month: month, amount: monthExpense, type: "Expenses"))
+        }
+        
+        return data
+    }
+
     // MARK: - Helper Methods
     private func formatDate(_ date: Date) -> String {
         let calendar = Calendar.current
@@ -540,6 +605,13 @@ struct TransactionItem {
     let category: String
     let date: Date
     let isIncome: Bool
+}
+
+struct MonthlyDataPoint: Identifiable {
+    let id = UUID()
+    let month: String
+    let amount: Double
+    let type: String
 }
 
 struct SummaryView_Previews: PreviewProvider {
