@@ -36,7 +36,9 @@ struct EditIncomeView: View {
     }
     
     private var isFormValid: Bool {
-        !newTitle.isEmpty && !amountString.isEmpty && amountString.toLocalizedDouble() != nil
+        !newTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && 
+        !amountString.isEmpty && 
+        (amountString.toLocalizedDouble() ?? 0) > 0
     }
 
     var body: some View {
@@ -116,7 +118,7 @@ struct EditIncomeView: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                 
-                Text("Update your income details")
+                Text("Update your income details".localized)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -132,13 +134,13 @@ struct EditIncomeView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.green)
                     .frame(width: 20)
-                Text("Income Name")
+                Text("Income Name".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
             }
             
-            TextField("Enter income name", text: $newTitle)
+            TextField("Enter income name".localized, text: $newTitle)
                 .textFieldStyle(EditIncomeTextFieldStyle())
         }
     }
@@ -150,7 +152,7 @@ struct EditIncomeView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.green)
                     .frame(width: 20)
-                Text("Amount")
+                Text("Amount".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -166,7 +168,7 @@ struct EditIncomeView: View {
                         }
                     }
                 
-                Picker("Currency", selection: $newCurrency) {
+                Picker("Currency".localized, selection: $newCurrency) {
                     ForEach(Currency.allCases, id: \.self) { currency in
                         Text(currency.symbol).tag(currency)
                     }
@@ -188,13 +190,13 @@ struct EditIncomeView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.green)
                     .frame(width: 20)
-                Text("Category")
+                Text("Category".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
             }
             
-            Picker("Category", selection: $newCategory) {
+            Picker("Category".localized, selection: $newCategory) {
                 ForEach(IncomeCategory.allCases, id: \.self) { cat in
                     Text(cat.rawValue.localized).tag(cat)
                 }
@@ -210,7 +212,7 @@ struct EditIncomeView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.green)
                     .frame(width: 20)
-                Text("Date")
+                Text("Date".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -233,7 +235,7 @@ struct EditIncomeView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.green)
                     .frame(width: 20)
-                Text("Photo")
+                Text("Photo".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -252,13 +254,13 @@ struct EditIncomeView: View {
                             HStack(spacing: 4) {
                                 Image(systemName: "camera.badge.ellipsis")
                                     .font(.caption)
-                                Text("Change")
+                                Text("Change".localized)
                                     .font(.caption)
                             }
                             .foregroundColor(.blue)
                         }
                         
-                        Button("Remove") {
+                        Button("Remove".localized) {
                             newPhoto = nil
                             selectedPhoto = nil
                         }
@@ -277,7 +279,7 @@ struct EditIncomeView: View {
                             .font(.system(size: 28))
                             .foregroundColor(.secondary)
                         
-                        Text("Add Photo")
+                        Text("Add Photo".localized)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -300,7 +302,7 @@ struct EditIncomeView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.green)
                     .frame(width: 20)
-                Text("Note")
+                Text("Note".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -317,7 +319,7 @@ struct EditIncomeView: View {
                     .scrollContentBackground(.hidden)
                 
                 if newNote.isEmpty {
-                    Text("Add optional note...")
+                    Text("Add optional note...".localized)
                         .foregroundColor(.secondary)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 20)

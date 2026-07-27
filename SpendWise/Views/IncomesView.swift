@@ -295,7 +295,11 @@ struct IncomesView: View {
         guard userId != "guest" else { return }
         isLoading = true
         defer { isLoading = false }
-        do { incomes = try await SupabaseService.shared.fetchIncomes(email: userId) } catch {}
+        do { 
+            incomes = try await SupabaseService.shared.fetchIncomes(email: userId) 
+        } catch {
+            ErrorHandler.shared.handle(error, context: "SupabaseSync")
+        }
     }
 }
 

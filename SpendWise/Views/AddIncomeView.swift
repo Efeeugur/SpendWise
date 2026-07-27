@@ -17,7 +17,9 @@ struct AddIncomeView: View {
     @State private var selectedPhoto: PhotosPickerItem?
     
     private var isFormValid: Bool {
-        !title.isEmpty && !amount.isEmpty && amount.toLocalizedDouble() != nil
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && 
+        !amount.isEmpty && 
+        (amount.toLocalizedDouble() ?? 0) > 0
     }
 
     var body: some View {
@@ -97,7 +99,7 @@ struct AddIncomeView: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                 
-                Text("Track your income sources")
+                Text("Track your income sources".localized)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -113,13 +115,13 @@ struct AddIncomeView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.green)
                     .frame(width: 20)
-                Text("Income Name")
+                Text("Income Name".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
             }
             
-            TextField("Enter income name", text: $title)
+            TextField("Enter income name".localized, text: $title)
                 .textFieldStyle(IncomeTextFieldStyle())
         }
     }
@@ -131,7 +133,7 @@ struct AddIncomeView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.green)
                     .frame(width: 20)
-                Text("Amount")
+                Text("Amount".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -142,7 +144,7 @@ struct AddIncomeView: View {
                     .keyboardType(.decimalPad)
                     .textFieldStyle(IncomeTextFieldStyle())
                 
-                Picker("Currency", selection: $selectedCurrency) {
+                Picker("Currency".localized, selection: $selectedCurrency) {
                     ForEach(Currency.allCases, id: \.self) { currency in
                         Text(currency.symbol).tag(currency)
                     }
@@ -164,13 +166,13 @@ struct AddIncomeView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.green)
                     .frame(width: 20)
-                Text("Category")
+                Text("Category".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
             }
             
-            Picker("Category", selection: $category) {
+            Picker("Category".localized, selection: $category) {
                 ForEach(IncomeCategory.allCases, id: \.self) { cat in
                     Text(cat.rawValue.localized).tag(cat)
                 }
@@ -186,7 +188,7 @@ struct AddIncomeView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.green)
                     .frame(width: 20)
-                Text("Date")
+                Text("Date".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -209,7 +211,7 @@ struct AddIncomeView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.green)
                     .frame(width: 20)
-                Text("Photo")
+                Text("Photo".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -223,7 +225,7 @@ struct AddIncomeView: View {
                         .frame(width: 80, height: 80)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                     
-                    Button("Remove Photo") {
+                    Button("Remove Photo".localized) {
                         selectedImage = nil
                         selectedPhoto = nil
                     }
@@ -241,7 +243,7 @@ struct AddIncomeView: View {
                             .font(.system(size: 28))
                             .foregroundColor(.secondary)
                         
-                        Text("Add Photo")
+                        Text("Add Photo".localized)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -264,7 +266,7 @@ struct AddIncomeView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.green)
                     .frame(width: 20)
-                Text("Note")
+                Text("Note".localized)
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)
@@ -281,7 +283,7 @@ struct AddIncomeView: View {
                     .scrollContentBackground(.hidden)
                 
                 if noteText.isEmpty {
-                    Text("Add optional note...")
+                    Text("Add optional note...".localized)
                         .foregroundColor(.secondary)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 20)
@@ -293,11 +295,12 @@ struct AddIncomeView: View {
     
     // MARK: - Actions
     private func saveIncome() {
-        guard let amountDouble = amount.toLocalizedDouble(), !title.isEmpty else { return }
+        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let amountDouble = amount.toLocalizedDouble(), amountDouble > 0, !trimmedTitle.isEmpty else { return }
         
         let photoData = selectedImage?.jpegData(compressionQuality: 0.7)
         let newIncome = Income(
-            title: title,
+            title: trimmedTitle,
             date: date,
             amount: amountDouble,
             category: category,
@@ -310,7 +313,9 @@ struct AddIncomeView: View {
             Task {
                 do { 
                     try await SupabaseService.shared.createIncome(email: email, income: newIncome) 
-                } catch {}
+                } catch {
+                    ErrorHandler.shared.handle(error, context: "SupabaseSync")
+                }
                 incomes.append(newIncome)
                 dismiss()
             }

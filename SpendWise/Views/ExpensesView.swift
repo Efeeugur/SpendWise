@@ -322,7 +322,11 @@ struct ExpensesView: View {
         guard userId != "guest" else { return }
         isLoading = true
         defer { isLoading = false }
-        do { expenses = try await SupabaseService.shared.fetchExpenses(email: userId) } catch {}
+        do { 
+            expenses = try await SupabaseService.shared.fetchExpenses(email: userId) 
+        } catch {
+            ErrorHandler.shared.handle(error, context: "SupabaseSync")
+        }
     }
 }
 
