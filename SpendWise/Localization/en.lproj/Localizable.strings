@@ -163,3 +163,22 @@
 "Total Income" = "Total Income";
 "You have exceeded your monthly expense limit. Total: ₺\\(totalStr) / Limit: ₺\\(limitStr)" = "You have exceeded your monthly expense limit. Total: ₺\\(totalStr) / Limit: ₺\\(limitStr)";
 "\\(title) payment due!" = "\\(title) payment due!";
+
+/* Phase 7: Recommendation strings */
+"Spending Limit Alert!" = "Spending Limit Alert!";
+"You have spent %d%% of your monthly spending limit this month. Be careful!" = "You have spent %d%% of your monthly spending limit this month. Be careful!";
+"Set Limit" = "Set Limit";
+"%@ High Spending" = "%@ High Spending";
+"Your spending is %d%% of your total spending in the %@ category. You can save in this area." = "Your spending is %d%% of your total spending in the %@ category. You can save in this area.";
+"Saving Tip" = "Saving Tip";
+"More than 80% of your income is being spent. Consider saving for emergencies." = "More than 80% of your income is being spent. Consider saving for emergencies.";
+"Food Savings" = "Food Savings";
+"More than 30% of your income is being spent on food. You can prepare meals and do bulk shopping." = "More than 30% of your income is being spent on food. You can prepare meals and do bulk shopping.";
+"Budget Optimization" = "Budget Optimization";
+"Your savings rate is %d. Aim to save at least 20%% of your income." = "Your savings rate is %d. Aim to save at least 20%% of your income.";
+"Perfect Savings!" = "Perfect Savings!";
+"Your savings rate is %d. Great job!" = "Your savings rate is %d. Great job!";
+"Spending Increase" = "Spending Increase";
+"You spent %d more than your average monthly expense this month. Check the trend." = "You spent %d more than your average monthly expense this month. Check the trend.";
+"Spending Decrease" = "Spending Decrease";
+"You spent %d less than your average monthly expense this month. Well done!" = "You spent %d less than your average monthly expense this month. Well done!";

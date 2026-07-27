@@ -87,6 +87,7 @@ class RecommendationManager: ObservableObject {
     
     private func checkSpendingLimit(incomes: [Income], expenses: [Expense]) -> Recommendation? {
         guard let monthlyLimit = UserDefaultsManager.loadMonthlyLimit() else { return nil }
+        let defaultCurrency = UserDefaultsManager.loadDefaultCurrency()
         
         let currentMonth = Calendar.current.component(.month, from: Date())
         let currentYear = Calendar.current.component(.year, from: Date())
@@ -97,18 +98,18 @@ class RecommendationManager: ObservableObject {
             return expenseMonth == currentMonth && expenseYear == currentYear
         }
         
-        let totalSpending = monthlyExpenses.reduce(0) { $0 + $1.amount }
+        let totalSpending = monthlyExpenses.reduce(0) { $0 + CurrencyManager.shared.convert($1.amount, from: $1.currency, to: defaultCurrency) }
         let limitPercentage = (totalSpending / monthlyLimit) * 100
         
         if limitPercentage >= 90 {
             return Recommendation(
                 type: .spendingLimit,
-                title: "Spending Limit Alert!",
-                description: "You have spent \(Int(limitPercentage))% of your monthly spending limit this month. Be careful!",
+                title: "Spending Limit Alert!".localized,
+                description: String(format: "You have spent %d%% of your monthly spending limit this month. Be careful!".localized, Int(limitPercentage)),
                 priority: 5,
                 date: Date(),
                 actionable: true,
-                actionTitle: "Set Limit",
+                actionTitle: "Set Limit".localized,
                 action: nil
             )
         }
@@ -118,6 +119,7 @@ class RecommendationManager: ObservableObject {
     
     private func analyzeCategorySpending(expenses: [Expense]) -> [Recommendation] {
         var recommendations: [Recommendation] = []
+        let defaultCurrency = UserDefaultsManager.loadDefaultCurrency()
         
         let currentMonth = Calendar.current.component(.month, from: Date())
         let currentYear = Calendar.current.component(.year, from: Date())
@@ -130,9 +132,9 @@ class RecommendationManager: ObservableObject {
         
         // Kategori bazlı harcama analizi
         let categoryTotals = Dictionary(grouping: monthlyExpenses, by: { $0.category })
-            .mapValues { expenses in expenses.reduce(0) { $0 + $1.amount } }
+            .mapValues { expenses in expenses.reduce(0) { $0 + CurrencyManager.shared.convert($1.amount, from: $1.currency, to: defaultCurrency) } }
         
-        let totalSpending = monthlyExpenses.reduce(0) { $0 + $1.amount }
+        let totalSpending = monthlyExpenses.reduce(0) { $0 + CurrencyManager.shared.convert($1.amount, from: $1.currency, to: defaultCurrency) }
         
         for (category, amount) in categoryTotals {
             let percentage = (amount / totalSpending) * 100
@@ -140,8 +142,8 @@ class RecommendationManager: ObservableObject {
             if percentage > 40 {
                 recommendations.append(Recommendation(
                     type: .categoryAlert,
-                    title: "\(category.rawValue) High Spending",
-                    description: "Your spending is \(Int(percentage))% of your total spending in the \(category.rawValue) category. You can save in this area.",
+                    title: String(format: "%@ High Spending".localized, category.rawValue),
+                    description: String(format: "Your spending is %d%% of your total spending in the %@ category. You can save in this area.".localized, Int(percentage), category.rawValue),
                     priority: 4,
                     date: Date(),
                     actionable: false,
@@ -156,6 +158,7 @@ class RecommendationManager: ObservableObject {
     
     private func generateSavingTips(incomes: [Income], expenses: [Expense]) -> [Recommendation] {
         var recommendations: [Recommendation] = []
+        let defaultCurrency = UserDefaultsManager.loadDefaultCurrency()
         
         let currentMonth = Calendar.current.component(.month, from: Date())
         let currentYear = Calendar.current.component(.year, from: Date())
@@ -172,14 +175,14 @@ class RecommendationManager: ObservableObject {
             return expenseMonth == currentMonth && expenseYear == currentYear
         }
         
-        let totalIncome = monthlyIncomes.reduce(0) { $0 + $1.amount }
-        let totalExpenses = monthlyExpenses.reduce(0) { $0 + $1.amount }
+        let totalIncome = monthlyIncomes.reduce(0) { $0 + CurrencyManager.shared.convert($1.amount, from: $1.currency, to: defaultCurrency) }
+        let totalExpenses = monthlyExpenses.reduce(0) { $0 + CurrencyManager.shared.convert($1.amount, from: $1.currency, to: defaultCurrency) }
         
         if totalExpenses > totalIncome * 0.8 {
             recommendations.append(Recommendation(
                 type: .savingTip,
-                title: "Saving Tip",
-                description: "More than 80% of your income is being spent. Consider saving for emergencies.",
+                title: "Saving Tip".localized,
+                description: "More than 80% of your income is being spent. Consider saving for emergencies.".localized,
                 priority: 3,
                 date: Date(),
                 actionable: false,
@@ -189,12 +192,12 @@ class RecommendationManager: ObservableObject {
         }
         
         // Gıda harcaması yüksekse öneri
-        let foodExpenses = monthlyExpenses.filter { $0.category == .food }.reduce(0) { $0 + $1.amount }
+        let foodExpenses = monthlyExpenses.filter { $0.category == .food }.reduce(0) { $0 + CurrencyManager.shared.convert($1.amount, from: $1.currency, to: defaultCurrency) }
         if foodExpenses > totalIncome * 0.3 {
             recommendations.append(Recommendation(
                 type: .savingTip,
-                title: "Food Savings",
-                description: "More than 30% of your income is being spent on food. You can prepare meals and do bulk shopping.",
+                title: "Food Savings".localized,
+                description: "More than 30% of your income is being spent on food. You can prepare meals and do bulk shopping.".localized,
                 priority: 3,
                 date: Date(),
                 actionable: false,
@@ -208,10 +211,11 @@ class RecommendationManager: ObservableObject {
     
     private func optimizeBudget(incomes: [Income], expenses: [Expense]) -> [Recommendation] {
         var recommendations: [Recommendation] = []
+        let defaultCurrency = UserDefaultsManager.loadDefaultCurrency()
         
         // Gelir-gider dengesi analizi
-        let totalIncome = incomes.reduce(0) { $0 + $1.amount }
-        let totalExpenses = expenses.reduce(0) { $0 + $1.amount }
+        let totalIncome = incomes.reduce(0) { $0 + CurrencyManager.shared.convert($1.amount, from: $1.currency, to: defaultCurrency) }
+        let totalExpenses = expenses.reduce(0) { $0 + CurrencyManager.shared.convert($1.amount, from: $1.currency, to: defaultCurrency) }
         
         if totalIncome > 0 {
             let savingsRate = ((totalIncome - totalExpenses) / totalIncome) * 100
@@ -219,8 +223,8 @@ class RecommendationManager: ObservableObject {
             if savingsRate < 10 {
                 recommendations.append(Recommendation(
                     type: .budgetOptimization,
-                    title: "Budget Optimization",
-                    description: "Your savings rate is \(Int(savingsRate)). Aim to save at least 20% of your income.",
+                    title: "Budget Optimization".localized,
+                    description: String(format: "Your savings rate is %d. Aim to save at least 20%% of your income.".localized, Int(savingsRate)),
                     priority: 3,
                     date: Date(),
                     actionable: false,
@@ -230,8 +234,8 @@ class RecommendationManager: ObservableObject {
             } else if savingsRate > 30 {
                 recommendations.append(Recommendation(
                     type: .budgetOptimization,
-                    title: "Perfect Savings!",
-                    description: "Your savings rate is \(Int(savingsRate)). Great job!",
+                    title: "Perfect Savings!".localized,
+                    description: String(format: "Your savings rate is %d. Great job!".localized, Int(savingsRate)),
                     priority: 2,
                     date: Date(),
                     actionable: false,
@@ -246,6 +250,7 @@ class RecommendationManager: ObservableObject {
     
     private func analyzeTrends(incomes: [Income], expenses: [Expense]) -> [Recommendation] {
         var recommendations: [Recommendation] = []
+        let defaultCurrency = UserDefaultsManager.loadDefaultCurrency()
         
         // Son 3 ayın trend analizi
         let calendar = Calendar.current
@@ -256,7 +261,7 @@ class RecommendationManager: ObservableObject {
         let recentExpenses = expenses.filter { $0.date >= threeMonthsAgo }
         
         if recentExpenses.count > 5 {
-            let avgMonthlyExpense = recentExpenses.reduce(0) { $0 + $1.amount } / 3
+            let avgMonthlyExpense = recentExpenses.reduce(0) { $0 + CurrencyManager.shared.convert($1.amount, from: $1.currency, to: defaultCurrency) } / 3
             
             let currentMonthExpenses = expenses.filter { expense in
                 let expenseMonth = calendar.component(.month, from: expense.date)
@@ -266,13 +271,13 @@ class RecommendationManager: ObservableObject {
                 return expenseMonth == currentMonth && expenseYear == currentYear
             }
             
-            let currentMonthTotal = currentMonthExpenses.reduce(0) { $0 + $1.amount }
+            let currentMonthTotal = currentMonthExpenses.reduce(0) { $0 + CurrencyManager.shared.convert($1.amount, from: $1.currency, to: defaultCurrency) }
             
             if currentMonthTotal > avgMonthlyExpense * 1.2 {
                 recommendations.append(Recommendation(
                     type: .trendAnalysis,
-                    title: "Spending Increase",
-                    description: "You spent \(Int(currentMonthTotal - avgMonthlyExpense * 1.2)) more than your average monthly expense this month. Check the trend.",
+                    title: "Spending Increase".localized,
+                    description: String(format: "You spent %d more than your average monthly expense this month. Check the trend.".localized, Int(currentMonthTotal - avgMonthlyExpense * 1.2)),
                     priority: 4,
                     date: Date(),
                     actionable: false,
@@ -282,8 +287,8 @@ class RecommendationManager: ObservableObject {
             } else if currentMonthTotal < avgMonthlyExpense * 0.8 {
                 recommendations.append(Recommendation(
                     type: .trendAnalysis,
-                    title: "Spending Decrease",
-                    description: "You spent \(Int(avgMonthlyExpense * 0.8 - currentMonthTotal)) less than your average monthly expense this month. Well done!",
+                    title: "Spending Decrease".localized,
+                    description: String(format: "You spent %d less than your average monthly expense this month. Well done!".localized, Int(avgMonthlyExpense * 0.8 - currentMonthTotal)),
                     priority: 2,
                     date: Date(),
                     actionable: false,

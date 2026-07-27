@@ -107,8 +107,8 @@ struct CustomTabBar: View {
         guard selectedTab != index else { return }
         
         withAnimation(.interpolatingSpring(
-            stiffness: performanceManager.springStiffness,
-            damping: performanceManager.springDamping
+            stiffness: performanceManager.isOptimizedMode ? 300 : 400,
+            damping: performanceManager.isOptimizedMode ? 30 : 25
         )) {
             selectedTab = index
         }
@@ -159,8 +159,8 @@ struct TabBarButton: View {
                             .frame(width: 64, height: 32)
                             .matchedGeometryEffect(id: "tabIndicator", in: namespace)
                             .animation(.interpolatingSpring(
-                                stiffness: PerformanceManager.shared.springStiffness,
-                                damping: PerformanceManager.shared.springDamping
+                                stiffness: 400,
+                                damping: 25
                             ), value: isSelected)
                     }
                     
