@@ -45,7 +45,7 @@ class ExportManager {
     }
     
     /// Escapes a CSV field per RFC 4180: wraps in quotes if it contains comma, quote, or newline
-    private func csvEscape(_ field: String) -> String {
+    func csvEscape(_ field: String) -> String {
         let needsQuoting = field.contains(",") || field.contains("\"") || field.contains("\n") || field.contains("\r")
         if needsQuoting {
             let escaped = field.replacingOccurrences(of: "\"", with: "\"\"")

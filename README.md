@@ -1,5 +1,7 @@
 # 📱 SpendWise
 
+[![CI](https://github.com/Efeeugur/SpendWise/actions/workflows/ci.yml/badge.svg)](https://github.com/Efeeugur/SpendWise/actions/workflows/ci.yml)
+
 A smart iOS expense tracking app built with SwiftUI, featuring multi-currency support and financial insights.
 
 ## ✨ Current Features
