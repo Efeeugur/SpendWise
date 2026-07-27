@@ -163,3 +163,22 @@
 "Total Income" = "Toplam Gelir";
 "You have exceeded your monthly expense limit. Total: ₺\\(totalStr) / Limit: ₺\\(limitStr)" = "Aylık harcama limitinizi aştınız. Toplam: ₺\\(totalStr) / Limit: ₺\\(limitStr)";
 "\\(title) payment due!" = "\\(title) ödeme zamanı!";
+
+/* Phase 7: Recommendation strings */
+"Spending Limit Alert!" = "Harcama Limiti Uyarısı!";
+"You have spent %d%% of your monthly spending limit this month. Be careful!" = "Bu ay harcama limitinizin %d%% kadarını harcadınız. Dikkatli olun!";
+"Set Limit" = "Limit Belirle";
+"%@ High Spending" = "%@ Yüksek Harcama";
+"Your spending is %d%% of your total spending in the %@ category. You can save in this area." = "Harcamalarınız %@ kategorisindeki toplam harcamalarınızın %d%% kadar. Bu alanda tasarruf edebilirsiniz.";
+"Saving Tip" = "Tasarruf İpucu";
+"More than 80% of your income is being spent. Consider saving for emergencies." = "Gelirinizin %80'inden fazlası harcanıyor. Acil durumlar için tasarruf etmeyi düşünün.";
+"Food Savings" = "Gıda Tasarrufu";
+"More than 30% of your income is being spent on food. You can prepare meals and do bulk shopping." = "Gelirinizin %30'undan fazlası gıdaya harcanıyor. Yemek hazırlayabilir ve toplu alışveriş yapabilirsiniz.";
+"Budget Optimization" = "Bütçe Optimizasyonu";
+"Your savings rate is %d. Aim to save at least 20%% of your income." = "Tasarruf oranınız %d. Gelirinizin en az %%20'sini tasarruf etmeyi hedefleyin.";
+"Perfect Savings!" = "Harika Tasarruf!";
+"Your savings rate is %d. Great job!" = "Tasarruf oranınız %d. Harika iş!";
+"Spending Increase" = "Harcama Artışı";
+"You spent %d more than your average monthly expense this month. Check the trend." = "Bu ay ortalama aylık harcamanızdan %d daha fazla harcadınız. Eğilimi kontrol edin.";
+"Spending Decrease" = "Harcama Düşüşü";
+"You spent %d less than your average monthly expense this month. Well done!" = "Bu ay ortalama aylık harcamanızdan %d daha az harcadınız. Tebrikler!";
