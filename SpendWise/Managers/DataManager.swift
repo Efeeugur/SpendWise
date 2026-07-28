@@ -139,9 +139,38 @@ final class DataManager: ObservableObject {
             let remoteIncomes = try await SupabaseService.shared.fetchIncomes(email: userId)
             let remoteExpenses = try await SupabaseService.shared.fetchExpenses(email: userId)
             
-            // Simple overwrite strategy for now (Server wins)
-            self.incomes = remoteIncomes
-            self.expenses = remoteExpenses
+            // Merge logic: Prevent local unsynced data from being wiped out
+            let localIncomes = UserDefaultsManager.loadIncomes(forUser: userId)
+            let localExpenses = UserDefaultsManager.loadExpenses(forUser: userId)
+            
+            var finalIncomes = remoteIncomes
+            for localIncome in localIncomes {
+                if !remoteIncomes.contains(where: { $0.id == localIncome.id }) {
+                    do {
+                        try await SupabaseService.shared.createIncome(email: userId, income: localIncome)
+                        finalIncomes.append(localIncome)
+                    } catch {
+                        print("Failed to upload missing local income: \(error)")
+                        finalIncomes.append(localIncome)
+                    }
+                }
+            }
+            
+            var finalExpenses = remoteExpenses
+            for localExpense in localExpenses {
+                if !remoteExpenses.contains(where: { $0.id == localExpense.id }) {
+                    do {
+                        try await SupabaseService.shared.createExpense(email: userId, expense: localExpense)
+                        finalExpenses.append(localExpense)
+                    } catch {
+                        print("Failed to upload missing local expense: \(error)")
+                        finalExpenses.append(localExpense)
+                    }
+                }
+            }
+            
+            self.incomes = finalIncomes.sorted { $0.date > $1.date }
+            self.expenses = finalExpenses.sorted { $0.date > $1.date }
             saveLocalData()
         } catch {
             print("Failed to sync data from Supabase: \(error)")
