@@ -178,3 +178,33 @@
 "System" = "Sistem";
 "Light" = "Açık";
 "Dark" = "Koyu";
+
+/* Missing ProfileSettingsView Strings */
+"Sign In or Create Account" = "Giriş Yap veya Hesap Oluştur";
+"User" = "Kullanıcı";
+"Member Since" = "Katılım Tarihi";
+"Username" = "Kullanıcı Adı";
+"Enter username" = "Kullanıcı adı girin";
+"Email" = "E-posta";
+"Enter email" = "E-posta girin";
+"Sign Out" = "Çıkış Yap";
+"Sign Out Confirmation" = "Çıkış Onayı";
+"Are you sure you want to sign out?" = "Çıkış yapmak istediğinize emin misiniz?";
+"Are you sure you want to permanently delete your account? This action cannot be undone." = "Hesabınızı kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.";
+"Close" = "Kapat";
+"Profile" = "Profil";
+"AI analyzes spending patterns for insights" = "Yapay zeka harcama alışkanlıklarınızı analiz eder";
+"Limit saved!" = "Limit kaydedildi!";
+"Help & FAQ" = "Yardım ve SSS";
+"Terms of Service" = "Hizmet Şartları";
+"Legal" = "Yasal";
+"Support" = "Destek";
+
+/* Missing SupabaseService Strings */
+"Account deletion failed (Invalid response)." = "Hesap silme başarısız (Geçersiz yanıt).";
+"Account deletion failed:" = "Hesap silinemedi:";
+"Unknown error" = "Bilinmeyen hata";
+"Invalid or unconfigured OAuth URL" = "Geçersiz veya yapılandırılmamış OAuth URL'si";
+"Login cancelled" = "Oturum açma iptal edildi";
+"Callback address not received" = "Geri dönüş adresi alınamadı";
+"OAuth browser could not be started" = "OAuth tarayıcı başlatılamadı";

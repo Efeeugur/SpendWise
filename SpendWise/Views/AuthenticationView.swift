@@ -23,10 +23,10 @@ struct AuthenticationView: View {
                     .font(.system(size: 80))
                     .foregroundColor(.blue)
                 
-                Text("SpendWise")
+                Text("SpendWise".localized)
                     .font(.largeTitle.bold())
                 
-                Text("Authentication is required to access your financial data")
+                Text("Authentication is required to access your financial data".localized)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -42,11 +42,11 @@ struct AuthenticationView: View {
                         .font(.system(size: 40))
                         .foregroundColor(.red)
                     
-                    Text("Account Locked")
+                    Text("Account Locked".localized)
                         .font(.title3.bold())
                         .foregroundColor(.red)
                     
-                    Text("Too many failed attempts. Try again in \(formatTime(lockoutTimeRemaining)).")
+                    Text("Too many failed attempts. Try again in \(formatTime(lockoutTimeRemaining)).".localized)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -65,7 +65,7 @@ struct AuthenticationView: View {
                             HStack {
                                 Image(systemName: securityManager.biometricType == .faceID ? "faceid" : "touchid")
                                     .font(.title2)
-                                Text("Sign in with \(securityManager.getBiometricTypeName())")
+                                Text("Sign in with \(securityManager.getBiometricTypeName())".localized)
                                     .font(.headline)
                             }
                             .frame(maxWidth: .infinity)
@@ -99,7 +99,7 @@ struct AuthenticationView: View {
                             Button {
                                 authenticateWithPassword()
                             } label: {
-                                Text("Sign in with Password")
+                                Text("Sign in with Password".localized)
                                     .font(.headline)
                                     .frame(maxWidth: .infinity)
                                     .padding()
@@ -111,7 +111,7 @@ struct AuthenticationView: View {
                             
                             // Remaining attempts indicator
                             if securityManager.remainingAttempts < KeychainManager.maxFailedAttempts {
-                                Text("Attempts remaining: \(securityManager.remainingAttempts)")
+                                Text("Attempts remaining: \(securityManager.remainingAttempts)".localized)
                                     .font(.caption)
                                     .foregroundColor(.orange)
                             }
@@ -122,7 +122,7 @@ struct AuthenticationView: View {
                         Button {
                             onSuccess()
                         } label: {
-                            Text("No Security - Continue")
+                            Text("No Security - Continue".localized)
                                 .font(.headline)
                                 .frame(maxWidth: .infinity)
                                 .padding()
@@ -139,11 +139,11 @@ struct AuthenticationView: View {
             
             // Security information
             VStack(spacing: 8) {
-                Text("🔒 Your data is secure")
+                Text("🔒 Your data is secure".localized)
                     .font(.caption)
                     .foregroundColor(.secondary)
                 
-                Text("After \(KeychainManager.maxFailedAttempts) failed attempts, the app will be temporarily locked")
+                Text("After \(KeychainManager.maxFailedAttempts) failed attempts, the app will be temporarily locked".localized)
                     .font(.caption2)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -152,7 +152,7 @@ struct AuthenticationView: View {
         }
         .background(Color(.systemBackground))
         .alert("Authentication", isPresented: $showAlert) {
-            Button("OK") { }
+            Button("OK".localized) { }
         } message: {
             Text(alertMessage)
         }

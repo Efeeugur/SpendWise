@@ -1,0 +1,166 @@
+%d expenses
+%d incomes
+AI analyzes spending patterns for insights
+Account
+Account Locked
+Add Expense
+Add First Expense
+Add First Income
+Add Income
+Add Photo
+Add Reminder
+Add optional note...
+After \(KeychainManager.maxFailedAttempts) failed attempts, the app will be temporarily locked
+Already have an account?
+Amount
+Analyzing recommendations...
+App Info
+App Protection
+Application
+Are you sure you want to delete this expense entry?
+Are you sure you want to delete this income entry?
+Are you sure you want to permanently delete your account? This action cannot be undone.
+Are you sure you want to sign out?
+At least 4 characters
+Attempts remaining: \(securityManager.remainingAttempts)
+Authentication is required to access your financial data
+BIOMETRIC AUTHENTICATION
+Biometric authentication is not available on this device.
+Budget Optimization
+Cancel
+Category
+Caution
+Change
+Charts require iOS 16+
+Close
+Confirm Password
+Continue as Guest
+Continue with Google
+Create Account
+Create a secure password to protect your financial data
+Create one
+Currency
+Currently, we have no recommendations. Your financial situation looks good.
+Danger
+Date
+Delete
+Delete Account
+Developer
+Don't have an account?
+Done
+Edit
+Edit Expense
+Edit Income
+Email
+Enter email
+Enter expense name
+Enter income name
+Enter username
+Excellent
+Expense Categories
+Expense Limit Exceeded!
+Expense Name
+Expense Reminder
+Expenses
+Expenses (\(currencyManager.formatAmount(totalExpenseConverted, currency: selectedDisplayCurrency)))
+Export Data
+Food Savings
+Guest User
+Help & FAQ
+Income (\(currencyManager.formatAmount(totalIncomeConverted, currency: selectedDisplayCurrency)))
+Income Categories
+Income Name
+Income vs Expenses
+Incomes
+Join SpendWise today
+Language
+Limit saved!
+Member Since
+Monthly Spending Limit
+Monthly Trend
+More than 30% of your income is being spent on food. You can prepare meals and do bulk shopping.
+More than 80% of your income is being spent. Consider saving for emergencies.
+Net Balance
+No Expenses Yet
+No Income Yet
+No Protection
+No Security - Continue
+No data available
+No recent transactions
+Note
+Notifications
+OK
+OR
+PASSWORD SETTINGS
+Password
+Passwords match
+Perfect Savings!
+Photo
+Profile
+Profile & Settings
+Protect your financial data with advanced security options
+Rate App
+Recent Transactions
+Refresh
+Reminder
+Reminder Date
+Remove
+Remove Photo
+Reports
+Requirements:
+SECURITY TEST
+SECURITY TYPE
+Save
+Save Password
+Saving Tip
+Search Expenses
+Search Income
+Security
+Set Limit
+Set Password
+Settings
+Sign In
+Sign In or Create Account
+Sign Out
+Sign Out Confirmation
+Sign in to your account
+Sign in with Password
+Sign in with \(securityManager.getBiometricTypeName())
+Smart Recommendations
+SpendWise
+SpendWise Team
+Spending Analysis
+Spending Decrease
+Spending Increase
+Spending Limit Alert!
+Spending Ratio
+Start tracking your expenses to understand your spending patterns and manage your budget.
+Start tracking your income sources to get insights into your financial growth.
+Summary
+Support
+Theme
+Too many failed attempts. Try again in \(formatTime(lockoutTimeRemaining)).
+Total Expenses
+Total Income
+Track your income sources
+Track your spending
+Type
+Update your expense details
+Update your income details
+User
+Username
+Version
+Welcome Back
+You are doing great!
+You have exceeded your monthly expense limit. Total: \(symbol)\(totalStr) / Limit: \(symbol)\(limitStr)
+You have spent %d%% of your monthly spending limit this month. Be careful!
+You spent %d less than your average monthly expense this month. Well done!
+You spent %d more than your average monthly expense this month. Check the trend.
+Your savings rate is %d. Aim to save at least 20%% of your income.
+Your savings rate is %d. Great job!
+Your spending is %d%% of your total spending in the %@ category. You can save in this area.
+\(Int(min(percentage * 100, 999)))%
+\(currency.rawValue) (\(currency.symbol))
+\(spendingPercentage)%
+\(title) payment due!
+🔒 Your data is secure

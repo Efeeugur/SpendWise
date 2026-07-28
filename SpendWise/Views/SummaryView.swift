@@ -199,7 +199,7 @@ struct SummaryView: View {
                     Circle()
                         .fill(Color.green)
                         .frame(width: 12, height: 12)
-                    Text("Income (\(currencyManager.formatAmount(totalIncomeConverted, currency: selectedDisplayCurrency)))")
+                    Text("Income (\(currencyManager.formatAmount(totalIncomeConverted, currency: selectedDisplayCurrency)))".localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -208,7 +208,7 @@ struct SummaryView: View {
                     Circle()
                         .fill(Color.red)
                         .frame(width: 12, height: 12)
-                    Text("Expenses (\(currencyManager.formatAmount(totalExpenseConverted, currency: selectedDisplayCurrency)))")
+                    Text("Expenses (\(currencyManager.formatAmount(totalExpenseConverted, currency: selectedDisplayCurrency)))".localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -273,7 +273,7 @@ struct SummaryView: View {
                 .foregroundColor(.primary)
             
             if data.isEmpty {
-                Text("No data available")
+                Text("No data available".localized)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -337,7 +337,7 @@ struct SummaryView: View {
                 .foregroundColor(.primary)
             
             if recentTransactions.isEmpty {
-                Text("No recent transactions")
+                Text("No recent transactions".localized)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -403,7 +403,7 @@ struct SummaryView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text("\(spendingPercentage)%")
+                    Text("\(spendingPercentage)%".localized)
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundColor(.primary)
@@ -426,15 +426,15 @@ struct SummaryView: View {
                 .frame(height: 12)
                 
                 HStack {
-                    Text("Excellent")
+                    Text("Excellent".localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text("Caution")
+                    Text("Caution".localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text("Danger")
+                    Text("Danger".localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -470,7 +470,7 @@ struct SummaryView: View {
                 .chartLegend(position: .bottom)
                 .frame(height: 200)
             } else {
-                Text("Charts require iOS 16+")
+                Text("Charts require iOS 16+".localized)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

@@ -13,7 +13,7 @@ struct RecommendationsView: View {
                     VStack(spacing: 16) {
                         ProgressView()
                             .scaleEffect(1.5)
-                        Text("Analyzing recommendations...")
+                        Text("Analyzing recommendations...".localized)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -24,10 +24,10 @@ struct RecommendationsView: View {
                             .font(.system(size: 60))
                             .foregroundColor(.green)
                         
-                        Text("You are doing great!")
+                        Text("You are doing great!".localized)
                             .font(.title2.bold())
                         
-                        Text("Currently, we have no recommendations. Your financial situation looks good.")
+                        Text("Currently, we have no recommendations. Your financial situation looks good.".localized)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -43,16 +43,16 @@ struct RecommendationsView: View {
                     .listStyle(.plain)
                 }
             }
-            .navigationTitle("Smart Recommendations")
+            .navigationTitle("Smart Recommendations".localized)
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Close") {
+                    Button("Close".localized) {
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Refresh") {
+                    Button("Refresh".localized) {
                         recommendationManager.generateRecommendations(incomes: incomes, expenses: expenses)
                     }
                 }

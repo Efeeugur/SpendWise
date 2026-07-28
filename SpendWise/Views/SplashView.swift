@@ -24,7 +24,7 @@ struct SplashView: View {
                             .foregroundColor(.green)
                     }
                     
-                    Text("SpendWise")
+                    Text("SpendWise".localized)
                         .font(.system(size: 32, weight: .bold))
                         .foregroundStyle(
                             LinearGradient(

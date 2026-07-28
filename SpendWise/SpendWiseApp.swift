@@ -4,6 +4,7 @@ import SwiftData
 @main
 struct SpendWiseApp: App {
     @StateObject private var themeManager = ThemeManager()
+    @StateObject private var dataManager = DataManager()
     let container: ModelContainer
     
     init() {
@@ -26,6 +27,7 @@ struct SpendWiseApp: App {
         WindowGroup {
             SplashView()
                 .environmentObject(themeManager)
+                .environmentObject(dataManager)
                 .preferredColorScheme(themeManager.colorScheme)
                 .modelContainer(container)
         }

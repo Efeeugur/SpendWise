@@ -178,3 +178,33 @@
 "System" = "System";
 "Light" = "Light";
 "Dark" = "Dark";
+
+/* Missing ProfileSettingsView Strings */
+"Sign In or Create Account" = "Sign In or Create Account";
+"User" = "User";
+"Member Since" = "Member Since";
+"Username" = "Username";
+"Enter username" = "Enter username";
+"Email" = "Email";
+"Enter email" = "Enter email";
+"Sign Out" = "Sign Out";
+"Sign Out Confirmation" = "Sign Out Confirmation";
+"Are you sure you want to sign out?" = "Are you sure you want to sign out?";
+"Are you sure you want to permanently delete your account? This action cannot be undone." = "Are you sure you want to permanently delete your account? This action cannot be undone.";
+"Close" = "Close";
+"Profile" = "Profile";
+"AI analyzes spending patterns for insights" = "AI analyzes spending patterns for insights";
+"Limit saved!" = "Limit saved!";
+"Help & FAQ" = "Help & FAQ";
+"Terms of Service" = "Terms of Service";
+"Legal" = "Legal";
+"Support" = "Support";
+
+/* Missing SupabaseService Strings */
+"Account deletion failed (Invalid response)." = "Account deletion failed (Invalid response).";
+"Account deletion failed:" = "Account deletion failed:";
+"Unknown error" = "Unknown error";
+"Invalid or unconfigured OAuth URL" = "Invalid or unconfigured OAuth URL";
+"Login cancelled" = "Login cancelled";
+"Callback address not received" = "Callback address not received";
+"OAuth browser could not be started" = "OAuth browser could not be started";

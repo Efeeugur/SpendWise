@@ -308,6 +308,60 @@ struct ProfileSettingsView: View {
                             .foregroundColor(.secondary)
                     }
                 }
+                
+                // LEGAL SECTION
+                Section(header: Text("Legal".localized)) {
+                    Button {
+                        if let url = URL(string: "https://spendwise.app/privacy") { UIApplication.shared.open(url) }
+                    } label: {
+                        HStack {
+                            Image(systemName: "hand.raised.fill")
+                                .foregroundColor(.blue)
+                                .frame(width: 24)
+                            Text("Privacy Policy".localized)
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "arrow.up.right.square")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    Button {
+                        if let url = URL(string: "https://spendwise.app/terms") { UIApplication.shared.open(url) }
+                    } label: {
+                        HStack {
+                            Image(systemName: "doc.text.fill")
+                                .foregroundColor(.purple)
+                                .frame(width: 24)
+                            Text("Terms of Service".localized)
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "arrow.up.right.square")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    
+                    Button {
+                        if let url = URL(string: "https://spendwise.app/support") { UIApplication.shared.open(url) }
+                    } label: {
+                        HStack {
+                            Image(systemName: "lifepreserver.fill")
+                                .foregroundColor(.orange)
+                                .frame(width: 24)
+                            Text("Support".localized) // We already have a "Support" string from previous section, it'll reuse it
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "arrow.up.right.square")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
             }
             .navigationTitle("Profile & Settings".localized)
             .onAppear {

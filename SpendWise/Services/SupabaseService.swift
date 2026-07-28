@@ -278,11 +278,11 @@ final class SupabaseService {
         let req = try makeRequest(path: "rpc/delete_user", method: "POST")
         let (data, resp) = try await URLSession.shared.data(for: req)
         guard let http = resp as? HTTPURLResponse else {
-            throw SupabaseError.server("Hesap silme başarısız (Geçersiz yanıt).")
+            throw SupabaseError.server("Account deletion failed (Invalid response).".localized)
         }
         if !(200...299).contains(http.statusCode) {
-            let msg = String(data: data, encoding: .utf8) ?? "Bilinmeyen hata"
-            throw SupabaseError.server("Hesap silinemedi: \(msg)")
+            let msg = String(data: data, encoding: .utf8) ?? "Unknown error".localized
+            throw SupabaseError.server("\("Account deletion failed:".localized) \(msg)")
         }
     }
 
@@ -362,7 +362,7 @@ final class OAuthManager: NSObject, ASWebAuthenticationPresentationContextProvid
         guard let authUrl = URL(string: "\(supabaseUrl)/auth/v1/authorize?provider=\(provider)&redirect_to=\(redirectUrl)"),
               let scheme = authUrl.scheme?.lowercased(),
               ["http", "https"].contains(scheme) else {
-            throw SupabaseError.config("Geçersiz veya yapılandırılmamış OAuth URL'si (\(supabaseUrl))")
+            throw SupabaseError.config("Invalid or unconfigured OAuth URL".localized + " (\(supabaseUrl))")
         }
         
         return try await withCheckedThrowingContinuation { continuation in
@@ -375,7 +375,7 @@ final class OAuthManager: NSObject, ASWebAuthenticationPresentationContextProvid
                     
                     if let error = error {
                         if (error as NSError).code == ASWebAuthenticationSessionError.canceledLogin.rawValue {
-                            continuation.resume(throwing: SupabaseError.server("Oturum açma iptal edildi".localized))
+                            continuation.resume(throwing: SupabaseError.server("Login cancelled".localized))
                         } else {
                             continuation.resume(throwing: error)
                         }
@@ -383,7 +383,7 @@ final class OAuthManager: NSObject, ASWebAuthenticationPresentationContextProvid
                     }
                     
                     guard let callbackURL = callbackURL else {
-                        continuation.resume(throwing: SupabaseError.server("Geri dönüş adresi alınamadı".localized))
+                        continuation.resume(throwing: SupabaseError.server("Callback address not received".localized))
                         return
                     }
                     
@@ -431,7 +431,7 @@ final class OAuthManager: NSObject, ASWebAuthenticationPresentationContextProvid
                 self.currentSession = session
                 if !session.start() {
                     self.currentSession = nil
-                    continuation.resume(throwing: SupabaseError.server("OAuth tarayıcı başlatılamadı".localized))
+                    continuation.resume(throwing: SupabaseError.server("OAuth browser could not be started".localized))
                 }
             }
         }
