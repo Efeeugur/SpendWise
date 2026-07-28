@@ -385,12 +385,31 @@ final class OAuthManager: NSObject, ASWebAuthenticationPresentationContextProvid
                         }
                     }
                     
+                    var email = params["email"] ?? "\(provider)_user@spendwise.app"
+                    var name = params["full_name"] ?? email.components(separatedBy: "@").first?.capitalized ?? "\(provider.capitalized) User"
+                    
                     if let accessToken = params["access_token"] {
                         UserDefaults.standard.set(accessToken, forKey: "supabase_token")
+                        
+                        // Parse JWT to extract real email and name
+                        let parts = accessToken.components(separatedBy: ".")
+                        if parts.count == 3 {
+                            var base64 = parts[1].replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+                            let paddedLength = base64.count + (4 - (base64.count % 4)) % 4
+                            base64 = base64.padding(toLength: paddedLength, withPad: "=", startingAt: 0)
+                            
+                            if let payloadData = Data(base64Encoded: base64),
+                               let payload = try? JSONSerialization.jsonObject(with: payloadData) as? [String: Any] {
+                                
+                                if let realEmail = payload["email"] as? String {
+                                    email = realEmail
+                                }
+                                if let meta = payload["user_metadata"] as? [String: Any], let fullName = meta["full_name"] as? String {
+                                    name = fullName
+                                }
+                            }
+                        }
                     }
-                    
-                    let email = params["email"] ?? "\(provider)_user@spendwise.app"
-                    let name = params["full_name"] ?? email.components(separatedBy: "@").first?.capitalized ?? "\(provider.capitalized) User"
                     
                     continuation.resume(returning: (email, name))
                 }
