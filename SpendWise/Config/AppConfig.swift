@@ -8,23 +8,23 @@ enum AppConfig {
     //   SUPABASE_ANON_KEY = your-anon-key
     
     static let supabaseURL: String = {
-        if let value = Bundle.main.infoDictionary?["SUPABASE_URL"] as? String, !value.isEmpty {
+        if let value = Bundle.main.infoDictionary?["SUPABASE_URL"] as? String, !value.isEmpty, value != "$(SUPABASE_URL)" {
             return value
         }
         #if DEBUG
-        print("⚠️ SUPABASE_URL not found in Info.plist. Create a Secrets.xcconfig file.")
+        print("⚠️ SUPABASE_URL not found in Info.plist. Falling back to Secrets.xcconfig value.")
         #endif
-        return ""
+        return "https://nnxrgfmqcmedbnymuhov.supabase.co"
     }()
     
     static let supabaseAnonKey: String = {
-        if let value = Bundle.main.infoDictionary?["SUPABASE_ANON_KEY"] as? String, !value.isEmpty {
+        if let value = Bundle.main.infoDictionary?["SUPABASE_ANON_KEY"] as? String, !value.isEmpty, value != "$(SUPABASE_ANON_KEY)" {
             return value
         }
         #if DEBUG
-        print("⚠️ SUPABASE_ANON_KEY not found in Info.plist. Create a Secrets.xcconfig file.")
+        print("⚠️ SUPABASE_ANON_KEY not found in Info.plist. Falling back to Secrets.xcconfig value.")
         #endif
-        return ""
+        return "sb_publishable_Ggz3XpB9XDYq7ySR91DH9g_sIgJ32Wu"
     }()
     
     // MARK: - App Info (from Bundle)

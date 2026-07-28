@@ -228,18 +228,8 @@ struct LoginOrRegisterView: View {
                                     .foregroundColor(Color(.systemGray3))
                             }
                         
-                            // Social OAuth login section (Apple, Google, Facebook)
+                            // Social OAuth login section (Google, Facebook)
                             VStack(spacing: 10) {
-                                // Apple Sign In
-                                SignInWithAppleButton(.signIn) { request in
-                                    request.requestedScopes = [.fullName, .email]
-                                } onCompletion: { result in
-                                    handleAppleSignIn(result: result)
-                                }
-                                .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
-                                .frame(height: 48)
-                                .cornerRadius(12)
-                                
                                 // Google Sign In
                                 Button(action: { handleOAuthSignIn(provider: "google") }) {
                                     HStack(spacing: 12) {
@@ -266,21 +256,6 @@ struct LoginOrRegisterView: View {
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 48)
                                 }
-                                .buttonStyle(EnhancedOutlineButtonStyle())
-                                
-                                // Continue as Guest
-                                Button(action: { isPresented = false }) {
-                                    HStack(spacing: 12) {
-                                        Image(systemName: "person.circle.fill")
-                                            .font(.system(size: 20))
-                                            .foregroundColor(.orange)
-                                        Text("Continue as Guest".localized)
-                                            .font(.system(size: 15, weight: .semibold))
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 48)
-                                }
-                                .buttonStyle(EnhancedOutlineButtonStyle())
                             }
                         }
                         .padding(.horizontal, 28)
@@ -340,6 +315,11 @@ struct LoginOrRegisterView: View {
         isLoading = true
         errorMessage = nil
         Task {
+            defer {
+                Task { @MainActor in
+                    self.isLoading = false
+                }
+            }
             do {
                 let (loggedEmail, userName) = try await SupabaseService.shared.signInWithOAuth(provider: provider)
                 await MainActor.run {
@@ -350,12 +330,10 @@ struct LoginOrRegisterView: View {
                     
                     NotificationCenter.default.post(name: .userDidLogin, object: nil)
                     self.isPresented = false
-                    self.isLoading = false
                 }
             } catch {
                 await MainActor.run {
                     self.errorMessage = "\(provider.capitalized) Sign-In: \(error.localizedDescription)"
-                    self.isLoading = false
                 }
             }
         }

@@ -344,63 +344,65 @@ final class OAuthManager: NSObject, ASWebAuthenticationPresentationContextProvid
     static let shared = OAuthManager()
     private var currentSession: ASWebAuthenticationSession?
     
-    @MainActor
     func startOAuth(provider: String, supabaseUrl: String) async throws -> (email: String, name: String) {
         let redirectScheme = "spendwise"
         let redirectUrl = "\(redirectScheme)://auth-callback"
         
-        guard let authUrl = URL(string: "\(supabaseUrl)/auth/v1/authorize?provider=\(provider)&redirect_to=\(redirectUrl)") else {
-            throw SupabaseError.config("Invalid OAuth URL")
+        guard let authUrl = URL(string: "\(supabaseUrl)/auth/v1/authorize?provider=\(provider)&redirect_to=\(redirectUrl)"),
+              let scheme = authUrl.scheme?.lowercased(),
+              ["http", "https"].contains(scheme) else {
+            throw SupabaseError.config("Geçersiz veya yapılandırılmamış OAuth URL'si (\(supabaseUrl))")
         }
         
         return try await withCheckedThrowingContinuation { continuation in
-            let session = ASWebAuthenticationSession(
-                url: authUrl,
-                callbackURLScheme: redirectScheme
-            ) { [weak self] callbackURL, error in
-                defer { self?.currentSession = nil }
-                
-                if let error = error {
-                    if (error as NSError).code == ASWebAuthenticationSessionError.canceledLogin.rawValue {
-                        continuation.resume(throwing: SupabaseError.server("Oturum açma iptal edildi".localized))
-                    } else {
-                        continuation.resume(throwing: error)
+            DispatchQueue.main.async {
+                let session = ASWebAuthenticationSession(
+                    url: authUrl,
+                    callbackURLScheme: redirectScheme
+                ) { [weak self] callbackURL, error in
+                    defer { self?.currentSession = nil }
+                    
+                    if let error = error {
+                        if (error as NSError).code == ASWebAuthenticationSessionError.canceledLogin.rawValue {
+                            continuation.resume(throwing: SupabaseError.server("Oturum açma iptal edildi".localized))
+                        } else {
+                            continuation.resume(throwing: error)
+                        }
+                        return
                     }
-                    return
-                }
-                
-                guard let callbackURL = callbackURL else {
-                    continuation.resume(throwing: SupabaseError.server("Geri dönüş adresi alınamadı".localized))
-                    return
-                }
-                
-                let fragment = callbackURL.fragment ?? callbackURL.query ?? ""
-                var params: [String: String] = [:]
-                for item in fragment.components(separatedBy: "&") {
-                    let pair = item.components(separatedBy: "=")
-                    if pair.count == 2, let key = pair[0].removingPercentEncoding, let val = pair[1].removingPercentEncoding {
-                        params[key] = val
+                    
+                    guard let callbackURL = callbackURL else {
+                        continuation.resume(throwing: SupabaseError.server("Geri dönüş adresi alınamadı".localized))
+                        return
                     }
+                    
+                    let fragment = callbackURL.fragment ?? callbackURL.query ?? ""
+                    var params: [String: String] = [:]
+                    for item in fragment.components(separatedBy: "&") {
+                        let pair = item.components(separatedBy: "=")
+                        if pair.count == 2, let key = pair[0].removingPercentEncoding, let val = pair[1].removingPercentEncoding {
+                            params[key] = val
+                        }
+                    }
+                    
+                    if let accessToken = params["access_token"] {
+                        UserDefaults.standard.set(accessToken, forKey: "supabase_token")
+                    }
+                    
+                    let email = params["email"] ?? "\(provider)_user@spendwise.app"
+                    let name = params["full_name"] ?? email.components(separatedBy: "@").first?.capitalized ?? "\(provider.capitalized) User"
+                    
+                    continuation.resume(returning: (email, name))
                 }
                 
-                if let accessToken = params["access_token"] {
-                    UserDefaults.standard.set(accessToken, forKey: "supabase_token")
+                session.presentationContextProvider = self
+                session.prefersEphemeralWebBrowserSession = false
+                
+                self.currentSession = session
+                if !session.start() {
+                    self.currentSession = nil
+                    continuation.resume(throwing: SupabaseError.server("OAuth tarayıcı başlatılamadı".localized))
                 }
-                
-                let email = params["email"] ?? "\(provider)_user@spendwise.app"
-                let name = params["full_name"] ?? email.components(separatedBy: "@").first?.capitalized ?? "\(provider.capitalized) User"
-                
-                continuation.resume(returning: (email, name))
-            }
-            
-            session.presentationContextProvider = self
-            session.prefersEphemeralWebBrowserSession = true
-            
-            self.currentSession = session
-            let started = session.start()
-            if !started {
-                self.currentSession = nil
-                continuation.resume(throwing: SupabaseError.server("OAuth tarayıcı başlatılamadı".localized))
             }
         }
     }
