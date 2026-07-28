@@ -275,6 +275,19 @@ final class SupabaseService {
         try await deleteAllExpenses(forEmail: email)
     }
 
+    // MARK: - Account Deletion
+    func deleteAccount() async throws {
+        let req = try makeRequest(path: "rpc/delete_user", method: "POST")
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse else {
+            throw SupabaseError.server("Hesap silme başarısız (Geçersiz yanıt).")
+        }
+        if !(200...299).contains(http.statusCode) {
+            let msg = String(data: data, encoding: .utf8) ?? "Bilinmeyen hata"
+            throw SupabaseError.server("Hesap silinemedi: \(msg)")
+        }
+    }
+
     // MARK: User profile upsert (schema-agnostic)
     func upsertUserProfile(email: String, name: String?) async throws {
         let tablesToTry = ["users", "profiles"]

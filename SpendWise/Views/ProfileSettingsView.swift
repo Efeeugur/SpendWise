@@ -606,7 +606,10 @@ struct AccountSheetView: View {
         .alert("Delete Account".localized, isPresented: $showDeleteAlert) {
             Button("Cancel".localized, role: .cancel) { }
             Button("Delete".localized, role: .destructive) {
-                Task { await handleDeleteAccount(); dismiss() }
+                Task { 
+                    await handleDeleteAccount() 
+                    dismiss() 
+                }
             }
         } message: {
             Text("Are you sure you want to permanently delete your account? This action cannot be undone.".localized)
@@ -662,10 +665,22 @@ struct AccountSheetView: View {
         guard let u = user else { return }
         let userId: String
         if u.isGuest { userId = "guest" } else if let email = u.email, !email.isEmpty { userId = email } else { userId = "guest" }
-        if userId != "guest" { isDeleting = true; do { try await SupabaseService.shared.deleteAllData(forEmail: userId) } catch { }; isDeleting = false }
+        
+        if userId != "guest" { 
+            isDeleting = true
+            do { 
+                try await SupabaseService.shared.deleteAccount() 
+            } catch { 
+                print("Error deleting account from Supabase: \(error)")
+            } 
+            isDeleting = false 
+        }
+        
         UserDefaultsManager.saveIncomes([], forUser: userId)
         UserDefaultsManager.saveExpenses([], forUser: userId)
         UserDefaultsManager.saveUser(nil)
         UserDefaultsManager.clearGuestCreatedAt()
+        
+        onLogout()
     }
 }
