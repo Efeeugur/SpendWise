@@ -178,7 +178,6 @@ final class SupabaseService {
     // MARK: Incomes
     func fetchIncomes(email: String) async throws -> [Income] {
         let req = try makeRequest(path: "incomes", query: [
-            URLQueryItem(name: "user_email", value: "eq.\(email)"),
             URLQueryItem(name: "select", value: "*")
         ])
         let (data, resp) = try await URLSession.shared.data(for: req)
@@ -215,7 +214,6 @@ final class SupabaseService {
     // MARK: Expenses
     func fetchExpenses(email: String) async throws -> [Expense] {
         let req = try makeRequest(path: "expenses", query: [
-            URLQueryItem(name: "user_email", value: "eq.\(email)"),
             URLQueryItem(name: "select", value: "*")
         ])
         let (data, resp) = try await URLSession.shared.data(for: req)
@@ -252,7 +250,7 @@ final class SupabaseService {
     // MARK: Bulk delete for user
     func deleteAllIncomes(forEmail email: String) async throws {
         let req = try makeRequest(path: "incomes", method: "DELETE", query: [
-            URLQueryItem(name: "user_email", value: "eq.\(email)")
+            URLQueryItem(name: "id", value: "not.is.null") // RLS will restrict this to ONLY the user's rows
         ])
         let (_, resp) = try await URLSession.shared.data(for: req)
         guard let http = resp as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
@@ -262,7 +260,7 @@ final class SupabaseService {
 
     func deleteAllExpenses(forEmail email: String) async throws {
         let req = try makeRequest(path: "expenses", method: "DELETE", query: [
-            URLQueryItem(name: "user_email", value: "eq.\(email)")
+            URLQueryItem(name: "id", value: "not.is.null") // RLS will restrict this to ONLY the user's rows
         ])
         let (_, resp) = try await URLSession.shared.data(for: req)
         guard let http = resp as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
