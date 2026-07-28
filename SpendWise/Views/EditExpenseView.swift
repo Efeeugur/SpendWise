@@ -186,8 +186,14 @@ struct EditExpenseView: View {
                 .frame(width: 80)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 14)
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(UIColor.secondarySystemGroupedBackground))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.primary.opacity(0.15), lineWidth: 1.2)
+                        )
+                )
             }
         }
     }
@@ -254,8 +260,14 @@ struct EditExpenseView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 14)
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(UIColor.secondarySystemGroupedBackground))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.primary.opacity(0.15), lineWidth: 1.2)
+                        )
+                )
         }
     }
     
@@ -341,7 +353,11 @@ struct EditExpenseView: View {
             
             ZStack(alignment: .topLeading) {
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemGray6))
+                    .fill(Color(UIColor.secondarySystemGroupedBackground))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.primary.opacity(0.15), lineWidth: 1.2)
+                    )
                     .frame(height: 100)
                 
                 TextEditor(text: $newNote)
@@ -391,8 +407,14 @@ struct EditExpenseTextFieldStyle: TextFieldStyle {
         configuration
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
-            .background(Color(.systemGray6))
-            .cornerRadius(12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(UIColor.secondarySystemGroupedBackground))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.primary.opacity(0.15), lineWidth: 1.2)
+                    )
+            )
             .font(.body)
     }
 }
