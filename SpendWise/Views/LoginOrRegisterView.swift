@@ -38,32 +38,32 @@ struct LoginOrRegisterView: View {
                             .padding(.trailing, 20)
                         }
                         
-                        // Enhanced branding section with logo
+                        // Enhanced branding section aligned with SpendWise Green UI Theme
                         VStack(spacing: 16) {
                             // App Logo
                             ZStack {
                                 Circle()
                                     .fill(
                                         LinearGradient(
-                                            colors: [Color.blue, Color.purple],
+                                            colors: [Color.green, Color.teal],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing
                                         )
                                     )
                                     .frame(width: 80, height: 80)
-                                    .shadow(color: .blue.opacity(0.3), radius: 10, x: 0, y: 5)
+                                    .shadow(color: .green.opacity(0.3), radius: 10, x: 0, y: 5)
                                 
-                                Image(systemName: "creditcard.and.123")
-                                    .font(.system(size: 36, weight: .medium))
+                                Image(systemName: "dollarsign.circle.fill")
+                                    .font(.system(size: 44, weight: .bold))
                                     .foregroundColor(.white)
                             }
                             
                             VStack(spacing: 6) {
-                                Text("SpendWise")
+                                Text("SpendWise".localized)
                                     .font(.system(size: 34, weight: .bold))
                                     .foregroundStyle(
                                         LinearGradient(
-                                            colors: [Color.blue, Color.purple],
+                                            colors: [Color.green, Color.teal],
                                             startPoint: .leading,
                                             endPoint: .trailing
                                         )
@@ -80,15 +80,15 @@ struct LoginOrRegisterView: View {
                         }
                         .padding(.top, 10)
                         
-                        // Form content with better spacing
-                        VStack(spacing: 28) {
-                            // Enhanced input fields
+                        // Form content
+                        VStack(spacing: 24) {
+                            // Input fields
                             VStack(spacing: 16) {
                                 // Email field with icon
                                 HStack {
-                                    Image(systemName: "envelope")
+                                    Image(systemName: "envelope.fill")
                                         .font(.system(size: 18))
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(.green)
                                         .frame(width: 24)
                                     
                                     TextField("Email".localized, text: $email)
@@ -98,53 +98,53 @@ struct LoginOrRegisterView: View {
                                 }
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 14)
-                                .background(Color(.systemGray6))
+                                .background(Color(UIColor.secondarySystemGroupedBackground))
                                 .cornerRadius(12)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 12)
-                                        .stroke(email.isEmpty ? Color(.systemGray4) : Color.blue, lineWidth: 1)
+                                        .stroke(email.isEmpty ? Color.primary.opacity(0.15) : Color.green, lineWidth: 1.2)
                                 )
                                 
                                 // Password field with icon
                                 HStack {
-                                    Image(systemName: "lock")
+                                    Image(systemName: "lock.fill")
                                         .font(.system(size: 18))
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(.green)
                                         .frame(width: 24)
                                     
                                     SecureField("Password".localized, text: $password)
                                 }
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 14)
-                                .background(Color(.systemGray6))
+                                .background(Color(UIColor.secondarySystemGroupedBackground))
                                 .cornerRadius(12)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 12)
-                                        .stroke(password.isEmpty ? Color(.systemGray4) : Color.blue, lineWidth: 1)
+                                        .stroke(password.isEmpty ? Color.primary.opacity(0.15) : Color.green, lineWidth: 1.2)
                                 )
                                 
-                                // Confirm password (only in register mode) with icon
+                                // Confirm password (only in register mode)
                                 if !isLoginMode {
                                     HStack {
-                                        Image(systemName: "lock.shield")
+                                        Image(systemName: "lock.shield.fill")
                                             .font(.system(size: 18))
-                                            .foregroundColor(.blue)
+                                            .foregroundColor(.green)
                                             .frame(width: 24)
                                         
                                         SecureField("Confirm Password".localized, text: $confirmPassword)
                                     }
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 14)
-                                    .background(Color(.systemGray6))
+                                    .background(Color(UIColor.secondarySystemGroupedBackground))
                                     .cornerRadius(12)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 12)
-                                            .stroke(confirmPassword.isEmpty ? Color(.systemGray4) : Color.blue, lineWidth: 1)
+                                            .stroke(confirmPassword.isEmpty ? Color.primary.opacity(0.15) : Color.green, lineWidth: 1.2)
                                     )
                                     .transition(.opacity.combined(with: .slide))
                                 }
                                 
-                                // Enhanced error message
+                                // Error message banner
                                 if let error = errorMessage {
                                     HStack {
                                         Image(systemName: "exclamationmark.triangle.fill")
@@ -161,9 +161,9 @@ struct LoginOrRegisterView: View {
                                 }
                             }
                         
-                            // Enhanced auth section
-                            VStack(spacing: 20) {
-                                // Mode switch with better styling
+                            // Auth CTA section
+                            VStack(spacing: 16) {
+                                // Mode switch
                                 HStack(spacing: 6) {
                                     Text(isLoginMode ? "Don't have an account?".localized : "Already have an account?".localized)
                                         .font(.subheadline)
@@ -179,11 +179,11 @@ struct LoginOrRegisterView: View {
                                         Text(isLoginMode ? "Create one".localized : "Sign In".localized)
                                             .font(.subheadline)
                                             .fontWeight(.semibold)
-                                            .foregroundColor(.blue)
+                                            .foregroundColor(.green)
                                     }
                                 }
                                 
-                                // Enhanced primary CTA button
+                                // Primary CTA button
                                 Button(action: loginOrRegister) {
                                     HStack(spacing: 12) {
                                         if isLoading {
@@ -197,74 +197,88 @@ struct LoginOrRegisterView: View {
                                             .foregroundColor(.white)
                                     }
                                     .frame(maxWidth: .infinity)
-                                    .frame(height: 52)
+                                    .frame(height: 50)
                                 }
                                 .background(
                                     LinearGradient(
-                                        colors: [Color.blue, Color.blue.opacity(0.8)],
+                                        colors: [Color.green, Color.teal],
                                         startPoint: .leading,
                                         endPoint: .trailing
                                     )
                                 )
                                 .cornerRadius(12)
-                                .shadow(color: .blue.opacity(0.3), radius: 8, x: 0, y: 4)
+                                .shadow(color: .green.opacity(0.3), radius: 8, x: 0, y: 4)
                                 .disabled(isFormInvalid || isLoading)
                                 .opacity(isFormInvalid || isLoading ? 0.6 : 1.0)
                                 .scaleEffect((isFormInvalid || isLoading) ? 0.98 : 1.0)
                                 .animation(.easeInOut(duration: 0.2), value: isFormInvalid || isLoading)
                             }
                         
-                            // Enhanced OR divider
+                            // OR divider
                             HStack {
                                 Rectangle()
                                     .frame(height: 1)
                                     .foregroundColor(Color(.systemGray3))
                                 Text("OR".localized)
-                                    .font(.system(size: 15, weight: .medium))
-                                    .foregroundColor(.primary)
-                                    .padding(.horizontal, 20)
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(.secondary)
+                                    .padding(.horizontal, 16)
                                 Rectangle()
                                     .frame(height: 1)
                                     .foregroundColor(Color(.systemGray3))
                             }
                         
-                            // Enhanced social login section
-                            VStack(spacing: 12) {
-                                // Apple Sign In with real credential handling
+                            // Social OAuth login section (Apple, Google, Facebook)
+                            VStack(spacing: 10) {
+                                // Apple Sign In
                                 SignInWithAppleButton(.signIn) { request in
                                     request.requestedScopes = [.fullName, .email]
                                 } onCompletion: { result in
                                     handleAppleSignIn(result: result)
                                 }
                                 .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
-                                .frame(height: 50)
+                                .frame(height: 48)
                                 .cornerRadius(12)
                                 
-                                // Enhanced Google Sign In
-                                Button(action: { errorMessage = "Google Sign-In requires Google SDK integration" }) {
+                                // Google Sign In
+                                Button(action: { handleOAuthSignIn(provider: "google") }) {
                                     HStack(spacing: 12) {
-                                        Image(systemName: "globe")
-                                            .font(.system(size: 18))
+                                        Image(systemName: "g.circle.fill")
+                                            .font(.system(size: 20))
                                             .foregroundColor(.red)
                                         Text("Continue with Google".localized)
-                                            .font(.system(size: 16, weight: .medium))
+                                            .font(.system(size: 15, weight: .semibold))
                                     }
                                     .frame(maxWidth: .infinity)
-                                    .frame(height: 50)
+                                    .frame(height: 48)
                                 }
                                 .buttonStyle(EnhancedOutlineButtonStyle())
                                 
-                                // Enhanced Continue as Guest
-                                Button(action: { isPresented = false }) {
+                                // Facebook Sign In
+                                Button(action: { handleOAuthSignIn(provider: "facebook") }) {
                                     HStack(spacing: 12) {
-                                        Image(systemName: "person")
-                                            .font(.system(size: 18))
-                                            .foregroundColor(.orange)
-                                        Text("Continue as Guest".localized)
-                                            .font(.system(size: 16, weight: .medium))
+                                        Image(systemName: "f.circle.fill")
+                                            .font(.system(size: 20))
+                                            .foregroundColor(Color(red: 24/255, green: 119/255, blue: 242/255))
+                                        Text("Continue with Facebook".localized)
+                                            .font(.system(size: 15, weight: .semibold))
                                     }
                                     .frame(maxWidth: .infinity)
-                                    .frame(height: 50)
+                                    .frame(height: 48)
+                                }
+                                .buttonStyle(EnhancedOutlineButtonStyle())
+                                
+                                // Continue as Guest
+                                Button(action: { isPresented = false }) {
+                                    HStack(spacing: 12) {
+                                        Image(systemName: "person.circle.fill")
+                                            .font(.system(size: 20))
+                                            .foregroundColor(.orange)
+                                        Text("Continue as Guest".localized)
+                                            .font(.system(size: 15, weight: .semibold))
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 48)
                                 }
                                 .buttonStyle(EnhancedOutlineButtonStyle())
                             }
@@ -291,8 +305,7 @@ struct LoginOrRegisterView: View {
     // MARK: - Methods
     private func loginOrRegister() {
         errorMessage = nil
-        // Validate password match in register mode
-        if !isLoginMode && password != confirmPassword { errorMessage = "Passwords do not match."; return }
+        if !isLoginMode && password != confirmPassword { errorMessage = "Passwords do not match.".localized; return }
         isLoading = true
         Task {
             do {
@@ -309,7 +322,6 @@ struct LoginOrRegisterView: View {
                     UserDefaultsManager.saveUser(newUser)
                     UserDefaultsManager.saveRegistrationDateIfNeeded()
                     
-                    // Post notification that user logged in
                     NotificationCenter.default.post(name: .userDidLogin, object: nil)
                     
                     self.isPresented = false
@@ -317,7 +329,32 @@ struct LoginOrRegisterView: View {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = isLoginMode ? "Login failed. Please check your credentials." : "Registration failed. Please try again."
+                    self.errorMessage = isLoginMode ? "Login failed. Please check your credentials.".localized : "Registration failed. Please try again.".localized
+                    self.isLoading = false
+                }
+            }
+        }
+    }
+    
+    private func handleOAuthSignIn(provider: String) {
+        isLoading = true
+        errorMessage = nil
+        Task {
+            do {
+                let (loggedEmail, userName) = try await SupabaseService.shared.signInWithOAuth(provider: provider)
+                await MainActor.run {
+                    let newUser = User(email: loggedEmail, name: userName, isGuest: false)
+                    self.user = newUser
+                    UserDefaultsManager.saveUser(newUser)
+                    UserDefaultsManager.saveRegistrationDateIfNeeded()
+                    
+                    NotificationCenter.default.post(name: .userDidLogin, object: nil)
+                    self.isPresented = false
+                    self.isLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    self.errorMessage = "\(provider.capitalized) Sign-In: \(error.localizedDescription)"
                     self.isLoading = false
                 }
             }
@@ -350,36 +387,14 @@ struct LoginOrRegisterView: View {
 }
 
 // MARK: - Custom Styles
-struct CustomTextFieldStyle: TextFieldStyle {
-    func _body(configuration: TextField<Self._Label>) -> some View {
-        configuration
-            .padding(.horizontal, 12)
-            .padding(.vertical, 12)
-            .background(Color(.systemGray6))
-            .cornerRadius(8)
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray4), lineWidth: 1))
-    }
-}
-
-struct OutlineButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .foregroundColor(.primary)
-            .background(Color(.systemBackground))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(.systemGray4), lineWidth: 1))
-            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
-    }
-}
-
 struct EnhancedOutlineButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .foregroundColor(.primary)
             .background(Color(.systemBackground))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(.systemGray3), lineWidth: 1.5))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.primary.opacity(0.15), lineWidth: 1.2))
             .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
-            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+            .shadow(color: .black.opacity(0.04), radius: 2, x: 0, y: 1)
             .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
     }
 }
