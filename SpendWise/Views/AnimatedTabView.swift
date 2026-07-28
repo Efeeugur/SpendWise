@@ -4,11 +4,8 @@ import SwiftUI
 
 struct AnimatedTabView: View {
     @Binding var selectedTab: Int
-    @Binding var incomes: [Income]
-    @Binding var expenses: [Expense]
-    @Binding var user: User?
-    @Binding var userId: String
     @Binding var showAuthSheet: Bool
+    @EnvironmentObject var dataManager: DataManager
     
     private let hapticFeedback = UIImpactFeedbackGenerator(style: .medium)
     
@@ -19,18 +16,18 @@ struct AnimatedTabView: View {
                 switch selectedTab {
                 case 0:
                     NavigationStack {
-                        IncomesView(incomes: $incomes, userId: $userId)
+                        IncomesView()
                             .navigationTitle("Incomes".localized)
                     }
                 case 1:
                     NavigationStack {
-                        ExpensesView(expenses: $expenses, userId: $userId)
+                        ExpensesView()
                             .navigationTitle("Expenses".localized)
                     }
                 case 2:
-                    SummaryView(incomes: $incomes, expenses: $expenses)
+                    SummaryView()
                 case 3:
-                    ProfileSettingsView(user: $user, isAuthSheetPresented: $showAuthSheet)
+                    ProfileSettingsView(isAuthSheetPresented: $showAuthSheet)
                 default:
                     EmptyView()
                 }
@@ -222,12 +219,9 @@ struct TabItem {
         var body: some View {
             AnimatedTabView(
                 selectedTab: $selectedTab,
-                incomes: $incomes,
-                expenses: $expenses,
-                user: $user,
-                userId: $userId,
                 showAuthSheet: $showAuthSheet
             )
+            .environmentObject(DataManager())
         }
     }
     

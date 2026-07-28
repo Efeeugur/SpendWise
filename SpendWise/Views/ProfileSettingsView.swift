@@ -10,7 +10,8 @@ struct ProfileSettingsView: View {
     @ObservedObject private var languageManager = AppLanguageManager.shared
     @State private var notificationsEnabled: Bool = true
     @State private var darkModeEnabled: Bool = false
-    @Binding var user: User?
+    @EnvironmentObject private var dataManager: DataManager
+    private var user: User? { dataManager.user }
     @Binding var isAuthSheetPresented: Bool
     @State private var monthlyLimitText: String = ""
     @State private var showLimitSaved: Bool = false
@@ -25,13 +26,8 @@ struct ProfileSettingsView: View {
         ("monthlySummary", "Monthly Summary"),
         ("categoryDistribution", "Category Distribution")
     ]
-    private var userId: String {
-        if let user = user {
-            if user.isGuest { return "guest" }
-            if let email = user.email, !email.isEmpty { return email }
-        }
-        return "guest"
-    }
+    private var userId: String { dataManager.userId }
+    
     var homeCards: [String] {
         get {
             (try? JSONDecoder().decode([String].self, from: Data(homeCardsRaw.utf8))) ?? ["lastExpenses", "monthlySummary", "categoryDistribution"]
@@ -42,8 +38,7 @@ struct ProfileSettingsView: View {
             }
         }
     }
-    public init(user: Binding<User?>, isAuthSheetPresented: Binding<Bool> = .constant(false)) {
-        self._user = user
+    public init(isAuthSheetPresented: Binding<Bool> = .constant(false)) {
         self._isAuthSheetPresented = isAuthSheetPresented
     }
     var body: some View {
@@ -94,7 +89,7 @@ struct ProfileSettingsView: View {
                     }
                     .buttonStyle(PlainButtonStyle())
                     .sheet(isPresented: $showAccountSheet) {
-                        AccountSheetView(user: $user, onLogout: handleLogout)
+                        AccountSheetView(onLogout: handleLogout)
                     }
                 }
                 
@@ -367,13 +362,12 @@ struct ProfileSettingsView: View {
             .onAppear {
                 if let user = user, user.isGuest, UserDefaultsManager.loadGuestCreatedAt() == nil { UserDefaultsManager.saveGuestCreatedAt(Date()) }
                 if let user = user, user.isGuest, UserDefaultsManager.shouldClearGuestData() {
-                    UserDefaultsManager.clearAllUserData(forUser: userId)
-                    self.user = nil
+                    dataManager.updateUser(nil)
                 }
                 if let limit = UserDefaultsManager.loadMonthlyLimit() { monthlyLimitText = String(format: "%.2f", limit) }
             }
             .sheet(isPresented: $showingSecurityView) { SecurityView() }
-            .sheet(isPresented: $isAuthSheetPresented) { LoginOrRegisterView(user: $user, isPresented: $isAuthSheetPresented) }
+            .sheet(isPresented: $isAuthSheetPresented) { LoginOrRegisterView(isPresented: $isAuthSheetPresented) }
         }
     }
     private var dateFormatter: DateFormatter {
@@ -408,15 +402,15 @@ struct ProfileSettingsView: View {
     
     func handleLogout() {
         UserDefaultsManager.clearAllUserData(forUser: userId)
-        UserDefaultsManager.saveIncomes([], forUser: userId)
-        UserDefaultsManager.saveExpenses([], forUser: userId)
-        user = nil
+        dataManager.updateUser(nil)
+        UserDefaultsManager.saveRegistrationDateIfNeeded()
         isAuthSheetPresented = true
     }
 }
 
 struct AccountSheetView: View {
-    @Binding var user: User?
+    @EnvironmentObject private var dataManager: DataManager
+    private var user: User? { dataManager.user }
     let onLogout: () -> Void
     @Environment(\.dismiss) var dismiss
     @State private var showDeleteAlert = false
@@ -673,7 +667,7 @@ struct AccountSheetView: View {
             Task {
                 if let data = try? await newItem.loadTransferable(type: Data.self) {
                     selectedAvatarImage = UIImage(data: data)
-                    if var u = user { u.avatarData = data; user = u }
+                    if var u = user { u.avatarData = data; dataManager.updateUser(u) }
                 }
             }
         }
@@ -689,8 +683,7 @@ struct AccountSheetView: View {
         if var u = user {
             u.name = editingName.isEmpty ? nil : editingName
             u.email = editingEmail.isEmpty ? nil : editingEmail
-            user = u
-            UserDefaultsManager.saveUser(u)
+            dataManager.updateUser(u)
         }
         isEditing = false
     }

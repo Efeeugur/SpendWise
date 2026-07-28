@@ -2,7 +2,7 @@ import SwiftUI
 import PhotosUI
 
 struct EditExpenseView: View {
-    @Binding var expenses: [Expense]
+    @EnvironmentObject private var dataManager: DataManager
     @Binding var expense: Expense
     @Environment(\.dismiss) var dismiss
     
@@ -23,8 +23,7 @@ struct EditExpenseView: View {
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var amountString: String
 
-    init(expenses: Binding<[Expense]>, expense: Binding<Expense>) {
-        self._expenses = expenses
+    init(expense: Binding<Expense>) {
         self._expense = expense
         self._newTitle = State(initialValue: expense.wrappedValue.title)
         self._newDate = State(initialValue: expense.wrappedValue.date)
@@ -380,24 +379,22 @@ struct EditExpenseView: View {
     private func saveExpense() {
         guard let amountDouble = amountString.toLocalizedDouble(), !newTitle.isEmpty else { return }
         
-        if let index = expenses.firstIndex(where: { $0.id == expense.id }) {
-            let photoData = newPhoto?.jpegData(compressionQuality: 0.7)
-            expenses[index] = Expense(
-                id: expense.id,
-                title: newTitle,
-                date: newDate,
-                amount: amountDouble,
-                type: newType,
-                category: newCategory,
-                currency: newCurrency,
-                note: newNote.isEmpty ? nil : newNote,
-                photoData: photoData
-            )
-            Task { 
-                try? await SupabaseService.shared.updateExpense(expenses[index]) 
-            }
+        let photoData = newPhoto?.jpegData(compressionQuality: 0.7)
+        let updatedExpense = Expense(
+            id: expense.id,
+            title: newTitle,
+            date: newDate,
+            amount: amountDouble,
+            type: newType,
+            category: newCategory,
+            currency: newCurrency,
+            note: newNote.isEmpty ? nil : newNote,
+            photoData: photoData
+        )
+        Task { 
+            await dataManager.updateExpense(updatedExpense)
+            dismiss()
         }
-        dismiss()
     }
 }
 

@@ -2,7 +2,7 @@ import SwiftUI
 import PhotosUI
 
 struct EditIncomeView: View {
-    @Binding var incomes: [Income]
+    @EnvironmentObject private var dataManager: DataManager
     var income: Income
     @Environment(\.dismiss) var dismiss
     
@@ -16,8 +16,7 @@ struct EditIncomeView: View {
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var amountString: String
 
-    init(incomes: Binding<[Income]>, income: Income) {
-        self._incomes = incomes
+    init(income: Income) {
         self.income = income
         self._newTitle = State(initialValue: income.title)
         self._newDate = State(initialValue: income.date)
@@ -349,23 +348,21 @@ struct EditIncomeView: View {
     private func saveIncome() {
         guard let amountDouble = amountString.toLocalizedDouble(), !newTitle.isEmpty else { return }
         
-        if let index = incomes.firstIndex(where: { $0.id == income.id }) {
-            let photoData = newPhoto?.jpegData(compressionQuality: 0.7)
-            incomes[index] = Income(
-                id: income.id,
-                title: newTitle,
-                date: newDate,
-                amount: amountDouble,
-                category: newCategory,
-                currency: newCurrency,
-                note: newNote.isEmpty ? nil : newNote,
-                photoData: photoData
-            )
-            Task { 
-                try? await SupabaseService.shared.updateIncome(incomes[index]) 
-            }
+        let photoData = newPhoto?.jpegData(compressionQuality: 0.7)
+        let updatedIncome = Income(
+            id: income.id,
+            title: newTitle,
+            date: newDate,
+            amount: amountDouble,
+            category: newCategory,
+            currency: newCurrency,
+            note: newNote.isEmpty ? nil : newNote,
+            photoData: photoData
+        )
+        Task { 
+            await dataManager.updateIncome(updatedIncome)
+            dismiss()
         }
-        dismiss()
     }
 }
 

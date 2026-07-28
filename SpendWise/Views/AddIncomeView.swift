@@ -2,8 +2,7 @@ import SwiftUI
 import PhotosUI
 
 struct AddIncomeView: View {
-    @Binding var incomes: [Income]
-    var userEmail: String? = nil
+    @EnvironmentObject private var dataManager: DataManager
     @Environment(\.dismiss) var dismiss
     @ObservedObject private var currencyManager = CurrencyManager.shared
     @State private var title: String = ""
@@ -325,18 +324,8 @@ struct AddIncomeView: View {
             photoData: photoData
         )
         
-        if let email = userEmail, email != "guest" {
-            Task {
-                do { 
-                    try await SupabaseService.shared.createIncome(email: email, income: newIncome) 
-                } catch {
-                    ErrorHandler.shared.handle(error, context: "SupabaseSync")
-                }
-                incomes.append(newIncome)
-                dismiss()
-            }
-        } else {
-            incomes.append(newIncome)
+        Task {
+            await dataManager.addIncome(newIncome)
             dismiss()
         }
     }

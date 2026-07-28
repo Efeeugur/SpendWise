@@ -2,7 +2,7 @@ import SwiftUI
 import AuthenticationServices
 
 struct LoginOrRegisterView: View {
-    @Binding var user: User?
+    @EnvironmentObject private var dataManager: DataManager
     @Binding var isPresented: Bool
     @State private var email: String = ""
     @State private var password: String = ""
@@ -293,8 +293,7 @@ struct LoginOrRegisterView: View {
                 await MainActor.run {
                     let userName = loggedEmail.components(separatedBy: "@").first?.capitalized ?? "User"
                     let newUser = User(email: loggedEmail, name: userName, isGuest: false)
-                    self.user = newUser
-                    UserDefaultsManager.saveUser(newUser)
+                    dataManager.updateUser(newUser)
                     UserDefaultsManager.saveRegistrationDateIfNeeded()
                     
                     NotificationCenter.default.post(name: .userDidLogin, object: nil)
@@ -324,8 +323,7 @@ struct LoginOrRegisterView: View {
                 let (loggedEmail, userName) = try await SupabaseService.shared.signInWithOAuth(provider: provider)
                 await MainActor.run {
                     let newUser = User(email: loggedEmail, name: userName, isGuest: false)
-                    self.user = newUser
-                    UserDefaultsManager.saveUser(newUser)
+                    dataManager.updateUser(newUser)
                     UserDefaultsManager.saveRegistrationDateIfNeeded()
                     
                     NotificationCenter.default.post(name: .userDidLogin, object: nil)
@@ -351,8 +349,7 @@ struct LoginOrRegisterView: View {
                 let displayName = fullName.isEmpty ? email.components(separatedBy: "@").first?.capitalized ?? "User" : fullName
                 
                 let newUser = User(email: email, name: displayName, isGuest: false)
-                self.user = newUser
-                UserDefaultsManager.saveUser(newUser)
+                dataManager.updateUser(newUser)
                 UserDefaultsManager.saveRegistrationDateIfNeeded()
                 
                 NotificationCenter.default.post(name: .userDidLogin, object: nil)
@@ -380,9 +377,9 @@ struct EnhancedOutlineButtonStyle: ButtonStyle {
 // MARK: - Preview
 struct LoginOrRegisterView_Previews: PreviewProvider {
     static var previews: some View {
-        LoginOrRegisterView(user: .constant(nil), isPresented: .constant(true))
+        LoginOrRegisterView(isPresented: .constant(true))
             .preferredColorScheme(.light)
-        LoginOrRegisterView(user: .constant(nil), isPresented: .constant(true))
+        LoginOrRegisterView(isPresented: .constant(true))
             .preferredColorScheme(.dark)
     }
 }

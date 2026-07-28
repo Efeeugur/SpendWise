@@ -2,8 +2,9 @@ import SwiftUI
 import Charts
 
 struct SummaryView: View {
-    @Binding var incomes: [Income]
-    @Binding var expenses: [Expense]
+    @EnvironmentObject private var dataManager: DataManager
+    private var incomes: [Income] { dataManager.incomes }
+    private var expenses: [Expense] { dataManager.expenses }
     @ObservedObject private var currencyManager = CurrencyManager.shared
     private var selectedDisplayCurrency: Currency { UserDefaultsManager.loadDefaultCurrency() }
 
@@ -616,9 +617,11 @@ struct MonthlyDataPoint: Identifiable {
 
 struct SummaryView_Previews: PreviewProvider {
     static var previews: some View {
-        SummaryView(incomes: .constant([]), expenses: .constant([]))
+        SummaryView()
+            .environmentObject(DataManager())
             .environment(\.colorScheme, .light)
-        SummaryView(incomes: .constant([]), expenses: .constant([]))
+        SummaryView()
+            .environmentObject(DataManager())
             .environment(\.colorScheme, .dark)
     }
 }

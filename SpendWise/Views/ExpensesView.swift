@@ -3,8 +3,8 @@ import SwiftUI
 @MainActor
 
 struct ExpensesView: View {
-    @Binding var expenses: [Expense]
-    @Binding var userId: String
+    @EnvironmentObject private var dataManager: DataManager
+    private var expenses: [Expense] { dataManager.expenses }
     @State private var searchText: String = ""
     @State private var showAddExpenseModal: Bool = false
     @State private var expenseToEdit: Expense? = nil
@@ -42,14 +42,11 @@ struct ExpensesView: View {
             }
         }
         .sheet(isPresented: $showAddExpenseModal) {
-            AddExpenseView(expenses: $expenses, userEmail: userId == "guest" ? nil : userId)
+            AddExpenseView()
         }
         .sheet(item: $expenseToEdit) { expense in
-            if expenses.firstIndex(where: { $0.id == expense.id }) != nil {
-                EditExpenseView(expenses: $expenses, expense: .constant(expense))
-            }
+            EditExpenseView(expense: .constant(expense))
         }
-        .task(id: userId) { await loadRemoteIfNeeded() }
     }
     
     // MARK: - Header Section
@@ -284,48 +281,13 @@ struct ExpensesView: View {
 
     // MARK: - Actions
     private func deleteExpense(_ expense: Expense) {
-        withAnimation {
-            expenses.removeAll { $0.id == expense.id }
-        }
-        
-        if userId != "guest" {
-            Task { 
-                try? await SupabaseService.shared.deleteExpense(id: expense.id) 
-            }
-        } else {
-            UserDefaultsManager.saveExpenses(expenses, forUser: userId)
-        }
+        Task { await dataManager.deleteExpense(id: expense.id) }
     }
 
     func deleteExpenses(at offsets: IndexSet) {
         let expensesToDelete = offsets.map { filteredExpenses[$0] }
-        
-        withAnimation {
-            for expense in expensesToDelete {
-                expenses.removeAll { $0.id == expense.id }
-            }
-        }
-        
-        if userId != "guest" {
-            Task { 
-                for expense in expensesToDelete {
-                    try? await SupabaseService.shared.deleteExpense(id: expense.id)
-                }
-            }
-        } else {
-            UserDefaultsManager.saveExpenses(expenses, forUser: userId)
-        }
-    }
-
-    @MainActor
-    private func loadRemoteIfNeeded() async {
-        guard userId != "guest" else { return }
-        isLoading = true
-        defer { isLoading = false }
-        do { 
-            expenses = try await SupabaseService.shared.fetchExpenses(email: userId) 
-        } catch {
-            ErrorHandler.shared.handle(error, context: "SupabaseSync")
+        for expense in expensesToDelete {
+            Task { await dataManager.deleteExpense(id: expense.id) }
         }
     }
 }

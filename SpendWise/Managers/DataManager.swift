@@ -80,6 +80,20 @@ final class DataManager: ObservableObject {
         }
     }
     
+    func updateIncome(_ income: Income) async {
+        if let index = incomes.firstIndex(where: { $0.id == income.id }) {
+            incomes[index] = income
+            saveLocalData()
+            if userId != "guest" {
+                do {
+                    try await SupabaseService.shared.updateIncome(income)
+                } catch {
+                    print("Failed to update income in Supabase: \(error)")
+                }
+            }
+        }
+    }
+    
     func addExpense(_ expense: Expense) async {
         expenses.append(expense)
         saveLocalData()
@@ -100,6 +114,20 @@ final class DataManager: ObservableObject {
                 try await SupabaseService.shared.deleteExpense(id: id)
             } catch {
                 print("Failed to delete expense from Supabase: \(error)")
+            }
+        }
+    }
+    
+    func updateExpense(_ expense: Expense) async {
+        if let index = expenses.firstIndex(where: { $0.id == expense.id }) {
+            expenses[index] = expense
+            saveLocalData()
+            if userId != "guest" {
+                do {
+                    try await SupabaseService.shared.updateExpense(expense)
+                } catch {
+                    print("Failed to update expense in Supabase: \(error)")
+                }
             }
         }
     }

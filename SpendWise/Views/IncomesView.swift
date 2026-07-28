@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct IncomesView: View {
-    @Binding var incomes: [Income]
-    @Binding var userId: String
+    @EnvironmentObject private var dataManager: DataManager
+    private var incomes: [Income] { dataManager.incomes }
     @State private var searchText: String = ""
     @State private var showAddIncomeModal: Bool = false
     @State private var incomeToEdit: Income? = nil
@@ -40,12 +40,11 @@ struct IncomesView: View {
             }
         }
         .sheet(isPresented: $showAddIncomeModal) {
-            AddIncomeView(incomes: $incomes, userEmail: userId == "guest" ? nil : userId)
+            AddIncomeView()
         }
         .sheet(item: $incomeToEdit) { income in
-            EditIncomeView(incomes: $incomes, income: income)
+            EditIncomeView(income: income)
         }
-        .task(id: userId) { await loadRemoteIfNeeded() }
     }
     
     // MARK: - Header Section
@@ -257,49 +256,7 @@ struct IncomesView: View {
 
     // MARK: - Actions
     private func deleteIncome(_ income: Income) {
-        withAnimation {
-            incomes.removeAll { $0.id == income.id }
-        }
-        
-        if userId != "guest" {
-            Task { 
-                try? await SupabaseService.shared.deleteIncome(id: income.id) 
-            }
-        } else {
-            UserDefaultsManager.saveIncomes(incomes, forUser: userId)
-        }
-    }
-
-    func deleteIncomes(at offsets: IndexSet) {
-        let incomesToDelete = offsets.map { filteredIncomes[$0] }
-        
-        withAnimation {
-            for income in incomesToDelete {
-                incomes.removeAll { $0.id == income.id }
-            }
-        }
-        
-        if userId != "guest" {
-            Task { 
-                for income in incomesToDelete {
-                    try? await SupabaseService.shared.deleteIncome(id: income.id)
-                }
-            }
-        } else {
-            UserDefaultsManager.saveIncomes(incomes, forUser: userId)
-        }
-    }
-
-    @MainActor
-    private func loadRemoteIfNeeded() async {
-        guard userId != "guest" else { return }
-        isLoading = true
-        defer { isLoading = false }
-        do { 
-            incomes = try await SupabaseService.shared.fetchIncomes(email: userId) 
-        } catch {
-            ErrorHandler.shared.handle(error, context: "SupabaseSync")
-        }
+        Task { await dataManager.deleteIncome(id: income.id) }
     }
 }
 
@@ -500,17 +457,11 @@ struct IncomeCard: View {
 // MARK: - Preview
 struct IncomesView_Previews: PreviewProvider {
     static var previews: some View {
-        IncomesView(incomes: .constant([
-            Income(title: "Freelance Project", date: Date(), amount: 500, category: .additionalIncome, currency: .USD, note: nil, photoData: nil),
-            Income(title: "Salary", date: Date().addingTimeInterval(-86400*14), amount: 2000, category: .salary, currency: .USD, note: nil, photoData: nil),
-            Income(title: "Freelance Project", date: Date().addingTimeInterval(-86400*20), amount: 350, category: .additionalIncome, currency: .USD, note: nil, photoData: nil)
-        ]), userId: .constant("previewUserId"))
-        .environment(\.colorScheme, .light)
-        IncomesView(incomes: .constant([
-            Income(title: "Freelance Project", date: Date(), amount: 500, category: .additionalIncome, currency: .USD, note: nil, photoData: nil),
-            Income(title: "Salary", date: Date().addingTimeInterval(-86400*14), amount: 2000, category: .salary, currency: .USD, note: nil, photoData: nil),
-            Income(title: "Freelance Project", date: Date().addingTimeInterval(-86400*20), amount: 350, category: .additionalIncome, currency: .USD, note: nil, photoData: nil)
-        ]), userId: .constant("previewUserId"))
-        .environment(\.colorScheme, .dark)
+        IncomesView()
+            .environmentObject(DataManager())
+            .environment(\.colorScheme, .light)
+        IncomesView()
+            .environmentObject(DataManager())
+            .environment(\.colorScheme, .dark)
     }
 }

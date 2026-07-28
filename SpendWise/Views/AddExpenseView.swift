@@ -2,8 +2,7 @@ import SwiftUI
 import PhotosUI
 
 struct AddExpenseView: View {
-    @Binding var expenses: [Expense]
-    var userEmail: String? = nil
+    @EnvironmentObject private var dataManager: DataManager
     @Environment(\.dismiss) var dismiss
     @ObservedObject private var currencyManager = CurrencyManager.shared
     @State private var title: String = ""
@@ -396,20 +395,8 @@ struct AddExpenseView: View {
             note: noteText.isEmpty ? nil : noteText,
             photoData: photoData
         )
-        
-        if let email = userEmail, email != "guest" {
-            Task {
-                do { 
-                    try await SupabaseService.shared.createExpense(email: email, expense: newExpense) 
-                } catch {
-                    ErrorHandler.shared.handle(error, context: "SupabaseSync")
-                }
-                expenses.append(newExpense)
-                handleLimitAndReminder(amount: amountDouble, date: date)
-                dismiss()
-            }
-        } else {
-            expenses.append(newExpense)
+        Task {
+            await dataManager.addExpense(newExpense)
             handleLimitAndReminder(amount: amountDouble, date: date)
             dismiss()
         }
@@ -420,7 +407,7 @@ struct AddExpenseView: View {
         if let limit = UserDefaultsManager.loadMonthlyLimit() {
             let month = Calendar.current.component(.month, from: date)
             let year = Calendar.current.component(.year, from: date)
-            let totalMonthExpense = expenses.filter {
+            let totalMonthExpense = dataManager.expenses.filter {
                 let t = $0.date
                 return Calendar.current.component(.month, from: t) == month && Calendar.current.component(.year, from: t) == year
             }.reduce(0) { $0 + currencyManager.convert($1.amount, from: $1.currency, to: selectedCurrency) }
