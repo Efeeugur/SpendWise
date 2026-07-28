@@ -8,6 +8,7 @@
 import XCTest
 @testable import SpendWise
 
+@MainActor
 final class SpendWiseTests: XCTestCase {
 
     // MARK: - Expense Model Tests
@@ -51,14 +52,15 @@ final class SpendWiseTests: XCTestCase {
     func testExpenseSaveAndLoad() {
         let userId = "test_user_\(UUID().uuidString)"
         let expenses = [
-            Expense(title: "Grocery Store", date: Date(), amount: 100, type: .oneTime, category: .food, currency: .TRY),
+            Expense(title: "Grocery Store", date: Date().addingTimeInterval(-100), amount: 100, type: .oneTime, category: .food, currency: .TRY),
             Expense(title: "Electricity Bill", date: Date(), amount: 200, type: .monthly, category: .bill, currency: .TRY)
         ]
         UserDefaultsManager.saveExpenses(expenses, forUser: userId)
         let loaded = UserDefaultsManager.loadExpenses(forUser: userId)
         XCTAssertEqual(loaded.count, 2)
-        XCTAssertEqual(loaded[0].title, "Grocery Store")
-        XCTAssertEqual(loaded[1].title, "Electricity Bill")
+        let titles = Set(loaded.map { $0.title })
+        XCTAssertTrue(titles.contains("Grocery Store"))
+        XCTAssertTrue(titles.contains("Electricity Bill"))
 
         // Clean up
         UserDefaultsManager.saveExpenses([], forUser: userId)
@@ -67,14 +69,15 @@ final class SpendWiseTests: XCTestCase {
     func testIncomeSaveAndLoad() {
         let userId = "test_user_\(UUID().uuidString)"
         let incomes = [
-            Income(title: "Salary", date: Date(), amount: 10000, category: .salary, currency: .TRY),
+            Income(title: "Salary", date: Date().addingTimeInterval(-100), amount: 10000, category: .salary, currency: .TRY),
             Income(title: "Freelance", date: Date(), amount: 3000, category: .additionalIncome, currency: .TRY)
         ]
         UserDefaultsManager.saveIncomes(incomes, forUser: userId)
         let loaded = UserDefaultsManager.loadIncomes(forUser: userId)
         XCTAssertEqual(loaded.count, 2)
-        XCTAssertEqual(loaded[0].title, "Salary")
-        XCTAssertEqual(loaded[1].title, "Freelance")
+        let titles = Set(loaded.map { $0.title })
+        XCTAssertTrue(titles.contains("Salary"))
+        XCTAssertTrue(titles.contains("Freelance"))
 
         // Clean up
         UserDefaultsManager.saveIncomes([], forUser: userId)

@@ -17,42 +17,46 @@ struct UserDefaultsManager {
     private static func incomesKey(for userId: String) -> String { "incomesKey_\(userId)" }
     private static func expensesKey(for userId: String) -> String { "expensesKey_\(userId)" }
     
-    // Kullanıcıya özel gelir kaydetme/yükleme
+    // MARK: - SwiftData-backed Data Operations
+    // These now delegate to PersistenceManager (SwiftData)
+    
+    @MainActor
     static func saveIncomes(_ incomes: [Income], forUser userId: String) {
-        if let encoded = try? JSONEncoder().encode(incomes) {
-            UserDefaults.standard.set(encoded, forKey: incomesKey(for: userId))
-        }
+        PersistenceManager.shared.saveIncomes(incomes, forUser: userId)
     }
+    @MainActor
     static func loadIncomes(forUser userId: String) -> [Income] {
-        if let data = UserDefaults.standard.data(forKey: incomesKey(for: userId)),
-           let decoded = try? JSONDecoder().decode([Income].self, from: data) {
-            return decoded
-        }
-        return []
+        PersistenceManager.shared.fetchIncomes(forUser: userId)
     }
-    // Kullanıcıya özel gider kaydetme/yükleme
+    @MainActor
     static func saveExpenses(_ expenses: [Expense], forUser userId: String) {
-        if let encoded = try? JSONEncoder().encode(expenses) {
-            UserDefaults.standard.set(encoded, forKey: expensesKey(for: userId))
-        }
+        PersistenceManager.shared.saveExpenses(expenses, forUser: userId)
     }
+    @MainActor
     static func loadExpenses(forUser userId: String) -> [Expense] {
-        if let data = UserDefaults.standard.data(forKey: expensesKey(for: userId)),
-           let decoded = try? JSONDecoder().decode([Expense].self, from: data) {
-            return decoded
-        }
-        return []
+        PersistenceManager.shared.fetchExpenses(forUser: userId)
     }
     
-    // Kullanıcı Kaydetme
+    // Kullanıcı Kaydetme (SwiftData + UserDefaults fallback for session tracking)
+    @MainActor
     static func saveUser(_ user: User?) {
-        if let encoded = try? JSONEncoder().encode(user) {
+        PersistenceManager.shared.saveUser(user)
+        // Also keep in UserDefaults for quick session checks at launch
+        if let user = user, let encoded = try? JSONEncoder().encode(user) {
             UserDefaults.standard.set(encoded, forKey: userKey)
+        } else {
+            UserDefaults.standard.removeObject(forKey: userKey)
         }
     }
     
     // Kullanıcı Yükleme
+    @MainActor
     static func loadUser() -> User? {
+        // Try SwiftData first, fallback to UserDefaults
+        if let user = PersistenceManager.shared.loadUser() {
+            return user
+        }
+        // Fallback for pre-migration launches
         if let data = UserDefaults.standard.data(forKey: userKey),
            let decoded = try? JSONDecoder().decode(User.self, from: data) {
             return decoded
@@ -224,13 +228,13 @@ struct UserDefaultsManager {
         return Date().timeIntervalSince(createdAt) > 7 * 24 * 60 * 60
     }
 
-    // Tüm kullanıcı verilerini temizle
+    // Tüm kullanıcı verilerini temizle (SwiftData + UserDefaults)
+    @MainActor
     static func clearAllUserData(forUser userId: String) {
-        saveUser(nil)
-        saveIncomes([], forUser: userId)
-        saveExpenses([], forUser: userId)
+        PersistenceManager.shared.clearAllData(forUser: userId)
+        PersistenceManager.shared.saveUser(nil)
+        UserDefaults.standard.removeObject(forKey: userKey)
         clearGuestCreatedAt()
-        // Diğer UserDefaults anahtarları da eklenebilir
     }
 
     // MARK: - Guest ephemeral helpers

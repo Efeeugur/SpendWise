@@ -111,22 +111,8 @@ struct ContentView: View {
     private func loadInitialData() async {
         let currentUserId = (user?.isGuest == true) ? "guest" : (user?.email ?? "guest")
         
-        // Load data in background to avoid blocking UI
-        await withTaskGroup(of: Void.self) { group in
-            group.addTask {
-                let loadedIncomes = UserDefaultsManager.loadIncomes(forUser: currentUserId)
-                await MainActor.run {
-                    self.incomes = loadedIncomes
-                }
-            }
-            
-            group.addTask {
-                let loadedExpenses = UserDefaultsManager.loadExpenses(forUser: currentUserId)
-                await MainActor.run {
-                    self.expenses = loadedExpenses
-                }
-            }
-        }
+        incomes = UserDefaultsManager.loadIncomes(forUser: currentUserId)
+        expenses = UserDefaultsManager.loadExpenses(forUser: currentUserId)
     }
 
     func handleLogout() {
