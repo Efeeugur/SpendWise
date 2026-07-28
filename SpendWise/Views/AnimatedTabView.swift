@@ -15,31 +15,27 @@ struct AnimatedTabView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Main content area
-            TabView(selection: $selectedTab) {
-                NavigationStack {
-                    IncomesView(incomes: $incomes, userId: $userId)
-                        .navigationTitle("Incomes".localized)
-                }
-                .tag(0)
-                
-                NavigationStack {
-                    ExpensesView(expenses: $expenses, userId: $userId)
-                        .navigationTitle("Expenses".localized)
-                }
-                .tag(1)
-                
-                NavigationStack {
+            Group {
+                switch selectedTab {
+                case 0:
+                    NavigationStack {
+                        IncomesView(incomes: $incomes, userId: $userId)
+                            .navigationTitle("Incomes".localized)
+                    }
+                case 1:
+                    NavigationStack {
+                        ExpensesView(expenses: $expenses, userId: $userId)
+                            .navigationTitle("Expenses".localized)
+                    }
+                case 2:
                     SummaryView(incomes: $incomes, expenses: $expenses)
-                        .navigationTitle("Summary".localized)
-                }
-                .tag(2)
-                
-                NavigationStack {
+                case 3:
                     ProfileSettingsView(user: $user, isAuthSheetPresented: $showAuthSheet)
+                default:
+                    EmptyView()
                 }
-                .tag(3)
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             
             // Custom animated tab bar
             CustomTabBar(selectedTab: $selectedTab, hapticFeedback: hapticFeedback)
