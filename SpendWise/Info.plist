@@ -7,6 +7,20 @@
     <key>SUPABASE_ANON_KEY</key>
     <string>$(SUPABASE_ANON_KEY)</string>
 
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLName</key>
+            <string>com.efeugur.SpendWise</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>spendwise</string>
+            </array>
+        </dict>
+    </array>
+
     <key>UIApplicationSupportsShakeToEdit</key>
     <true/>
 </dict>
