@@ -9,7 +9,7 @@ enum AppConfig {
     
     static let supabaseURL: String = {
         if let value = Bundle.main.infoDictionary?["SUPABASE_URL"] as? String, !value.isEmpty, value != "$(SUPABASE_URL)" {
-            return value
+            return value.trimmingCharacters(in: .whitespacesAndNewlines)
         }
         #if DEBUG
         print("⚠️ SUPABASE_URL not found in Info.plist. Falling back to Secrets.xcconfig value.")
@@ -19,7 +19,7 @@ enum AppConfig {
     
     static let supabaseAnonKey: String = {
         if let value = Bundle.main.infoDictionary?["SUPABASE_ANON_KEY"] as? String, !value.isEmpty, value != "$(SUPABASE_ANON_KEY)" {
-            return value
+            return value.trimmingCharacters(in: .whitespacesAndNewlines)
         }
         #if DEBUG
         print("⚠️ SUPABASE_ANON_KEY not found in Info.plist. Falling back to Secrets.xcconfig value.")
