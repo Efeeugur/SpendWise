@@ -157,8 +157,14 @@ struct AddExpenseView: View {
                 .frame(width: 80)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 14)
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(UIColor.secondarySystemGroupedBackground))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.primary.opacity(0.15), lineWidth: 1.2)
+                        )
+                )
             }
         }
     }
@@ -225,8 +231,14 @@ struct AddExpenseView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 14)
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(UIColor.secondarySystemGroupedBackground))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.primary.opacity(0.15), lineWidth: 1.2)
+                        )
+                )
         }
     }
     
@@ -247,16 +259,28 @@ struct AddExpenseView: View {
                 Toggle("Add Reminder".localized, isOn: $isReminderOn)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(UIColor.secondarySystemGroupedBackground))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.primary.opacity(0.15), lineWidth: 1.2)
+                            )
+                    )
                 
                 if isReminderOn {
                     DatePicker("Reminder Date".localized, selection: $reminderDate, displayedComponents: [.date, .hourAndMinute])
                         .datePickerStyle(CompactDatePickerStyle())
                         .padding(.horizontal, 16)
                         .padding(.vertical, 14)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(UIColor.secondarySystemGroupedBackground))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.primary.opacity(0.15), lineWidth: 1.2)
+                                )
+                        )
                         .transition(.opacity.combined(with: .slide))
                 }
             }
@@ -333,7 +357,11 @@ struct AddExpenseView: View {
             
             ZStack(alignment: .topLeading) {
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemGray6))
+                    .fill(Color(UIColor.secondarySystemGroupedBackground))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.primary.opacity(0.15), lineWidth: 1.2)
+                    )
                     .frame(height: 100)
                 
                 TextEditor(text: $noteText)
@@ -424,8 +452,14 @@ struct ExpenseTextFieldStyle: TextFieldStyle {
         configuration
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
-            .background(Color(.systemGray6))
-            .cornerRadius(12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(UIColor.secondarySystemGroupedBackground))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.primary.opacity(0.15), lineWidth: 1.2)
+                    )
+            )
             .font(.body)
     }
 }
