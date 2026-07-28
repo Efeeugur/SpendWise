@@ -406,13 +406,18 @@ final class OAuthManager: NSObject, ASWebAuthenticationPresentationContextProvid
     }
     
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        if let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
-           let window = windowScene.windows.first(where: { $0.isKeyWindow }) {
-            return window
+        for scene in UIApplication.shared.connectedScenes {
+            if let windowScene = scene as? UIWindowScene {
+                if let window = windowScene.windows.first(where: { $0.isKeyWindow }) {
+                    return window
+                }
+                if let window = windowScene.windows.first {
+                    return window
+                }
+            }
         }
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first {
-            return window
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            return UIWindow(windowScene: windowScene)
         }
         return UIWindow()
     }
