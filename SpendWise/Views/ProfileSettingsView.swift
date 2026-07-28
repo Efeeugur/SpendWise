@@ -141,7 +141,7 @@ struct ProfileSettingsView: View {
                             .frame(width: 24)
                         Picker("Currency".localized, selection: $defaultCurrency) {
                             ForEach(Currency.allCases, id: \.self) { currency in
-                                Text("\(currency.rawValue) (\(currency.symbol))").tag(currency)
+                                Text("\(currency.rawValue) (\(currency.symbol))".localized).tag(currency)
                             }
                         }
                         .onChange(of: defaultCurrency) { _, newValue in
@@ -213,7 +213,7 @@ struct ProfileSettingsView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("App Protection".localized)
                                     .foregroundColor(.primary)
-                                Text(UserDefaultsManager.loadSecurityType().rawValue)
+                                Text(UserDefaultsManager.loadSecurityType().rawValue.localized)
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -304,12 +304,12 @@ struct ProfileSettingsView: View {
                     HStack {
                         Text("Developer".localized)
                         Spacer()
-                        Text("SpendWise Team")
+                        Text("SpendWise Team".localized)
                             .foregroundColor(.secondary)
                     }
                 }
             }
-            .navigationTitle("Profile & Settings")
+            .navigationTitle("Profile & Settings".localized)
             .onAppear {
                 if let user = user, user.isGuest, UserDefaultsManager.loadGuestCreatedAt() == nil { UserDefaultsManager.saveGuestCreatedAt(Date()) }
                 if let user = user, user.isGuest, UserDefaultsManager.shouldClearGuestData() {
@@ -333,10 +333,10 @@ struct ProfileSettingsView: View {
         })
     }
     private func getUserDisplayName() -> String {
-        guard let user = user else { return "Guest User" }
+        guard let user = user else { return "Guest User".localized }
         
         if user.isGuest {
-            return "Guest User"
+            return "Guest User".localized
         }
         
         // If user has a name, use it

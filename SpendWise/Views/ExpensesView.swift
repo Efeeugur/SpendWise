@@ -93,7 +93,7 @@ struct ExpensesView: View {
                         .minimumScaleFactor(0.8)
                         .lineLimit(1)
                     
-                    Text("\(expenses.count) expense\(expenses.count == 1 ? "" : "s")")
+                    Text(String(format: "%d expenses".localized, expenses.count))
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.8))
                 }
@@ -121,7 +121,7 @@ struct ExpensesView: View {
                 .font(.caption2)
                 .foregroundColor(.white.opacity(0.8))
             
-            Text("\(Int(min(percentage * 100, 999)))%")
+            Text("\(Int(min(percentage * 100, 999)))%".localized)
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(isOverBudget ? .yellow : .white)
@@ -205,7 +205,7 @@ struct ExpensesView: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                 
-                Text("Start tracking your expenses to understand your spending patterns and manage your budget.")
+                Text("Start tracking your expenses to understand your spending patterns and manage your budget.".localized)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -218,7 +218,7 @@ struct ExpensesView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "plus")
                         .font(.system(size: 16, weight: .semibold))
-                    Text("Add First Expense")
+                    Text("Add First Expense".localized)
                         .font(.subheadline)
                         .fontWeight(.semibold)
                 }
@@ -457,21 +457,21 @@ struct ExpenseCard: View {
         }
         .buttonStyle(PlainButtonStyle())
         .contextMenu {
-            Button("Edit", systemImage: "pencil") {
+            Button("Edit".localized, systemImage: "pencil") {
                 onTap()
             }
             
-            Button("Delete", systemImage: "trash", role: .destructive) {
+            Button("Delete".localized, systemImage: "trash", role: .destructive) {
                 showingDeleteAlert = true
             }
         }
         .alert("Delete Expense", isPresented: $showingDeleteAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Delete", role: .destructive) {
+            Button("Cancel".localized, role: .cancel) { }
+            Button("Delete".localized, role: .destructive) {
                 onDelete()
             }
         } message: {
-            Text("Are you sure you want to delete this expense entry?")
+            Text("Are you sure you want to delete this expense entry?".localized)
         }
     }
     
