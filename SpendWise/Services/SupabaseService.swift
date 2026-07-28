@@ -336,11 +336,20 @@ import AuthenticationServices
 extension SupabaseService {
     @MainActor
     func signInWithOAuth(provider: String) async throws -> (email: String, name: String) {
+        try await OAuthManager.shared.startOAuth(provider: provider, supabaseUrl: supabaseUrl)
+    }
+}
+
+final class OAuthManager: NSObject, ASWebAuthenticationPresentationContextProviding {
+    static let shared = OAuthManager()
+    private var currentSession: ASWebAuthenticationSession?
+    
+    @MainActor
+    func startOAuth(provider: String, supabaseUrl: String) async throws -> (email: String, name: String) {
         let redirectScheme = "spendwise"
         let redirectUrl = "\(redirectScheme)://auth-callback"
         
-        let authUrlString = "\(supabaseUrl)/auth/v1/authorize?provider=\(provider)&redirect_to=\(redirectUrl)"
-        guard let authUrl = URL(string: authUrlString) else {
+        guard let authUrl = URL(string: "\(supabaseUrl)/auth/v1/authorize?provider=\(provider)&redirect_to=\(redirectUrl)") else {
             throw SupabaseError.config("Invalid OAuth URL")
         }
         
@@ -348,10 +357,12 @@ extension SupabaseService {
             let session = ASWebAuthenticationSession(
                 url: authUrl,
                 callbackURLScheme: redirectScheme
-            ) { callbackURL, error in
+            ) { [weak self] callbackURL, error in
+                defer { self?.currentSession = nil }
+                
                 if let error = error {
                     if (error as NSError).code == ASWebAuthenticationSessionError.canceledLogin.rawValue {
-                        continuation.resume(throwing: SupabaseError.server("Login cancelled"))
+                        continuation.resume(throwing: SupabaseError.server("Oturum açma iptal edildi".localized))
                     } else {
                         continuation.resume(throwing: error)
                     }
@@ -359,17 +370,16 @@ extension SupabaseService {
                 }
                 
                 guard let callbackURL = callbackURL else {
-                    continuation.resume(throwing: SupabaseError.server("No callback URL returned"))
+                    continuation.resume(throwing: SupabaseError.server("Geri dönüş adresi alınamadı".localized))
                     return
                 }
                 
-                // Parse access_token or fragment params
                 let fragment = callbackURL.fragment ?? callbackURL.query ?? ""
                 var params: [String: String] = [:]
                 for item in fragment.components(separatedBy: "&") {
                     let pair = item.components(separatedBy: "=")
-                    if pair.count == 2 {
-                        params[pair[0]] = pair[1].removingPercentEncoding
+                    if pair.count == 2, let key = pair[0].removingPercentEncoding, let val = pair[1].removingPercentEncoding {
+                        params[key] = val
                     }
                 }
                 
@@ -383,22 +393,28 @@ extension SupabaseService {
                 continuation.resume(returning: (email, name))
             }
             
-            session.presentationContextProvider = OAuthContextProvider.shared
-            session.prefersEphemeralWebBrowserSession = false
-            session.start()
+            session.presentationContextProvider = self
+            session.prefersEphemeralWebBrowserSession = true
+            
+            self.currentSession = session
+            let started = session.start()
+            if !started {
+                self.currentSession = nil
+                continuation.resume(throwing: SupabaseError.server("OAuth tarayıcı başlatılamadı".localized))
+            }
         }
     }
-}
-
-final class OAuthContextProvider: NSObject, ASWebAuthenticationPresentationContextProviding {
-    static let shared = OAuthContextProvider()
     
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+        if let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
            let window = windowScene.windows.first(where: { $0.isKeyWindow }) {
             return window
         }
-        return ASPresentationAnchor()
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            return window
+        }
+        return UIWindow()
     }
 }
 
