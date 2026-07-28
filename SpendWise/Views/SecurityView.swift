@@ -14,14 +14,14 @@ struct PasswordSetupView: View {
             ScrollView {
                 VStack(spacing: 32) {
                     VStack(spacing: 16) {
-                        Text("Set Password").font(.largeTitle).fontWeight(.bold).foregroundColor(.primary)
-                        Text("Create a secure password to protect your financial data").font(.subheadline).foregroundColor(.secondary).multilineTextAlignment(.center)
+                        Text("Set Password".localized).font(.largeTitle).fontWeight(.bold).foregroundColor(.primary)
+                        Text("Create a secure password to protect your financial data".localized).font(.subheadline).foregroundColor(.secondary).multilineTextAlignment(.center)
                     }
                     .padding(.top, 40)
                     
                     VStack(spacing: 20) {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Password").font(.subheadline).fontWeight(.medium).foregroundColor(.secondary)
+                            Text("Password".localized).font(.subheadline).fontWeight(.medium).foregroundColor(.secondary)
                             HStack {
                                 if isPasswordVisible {
                                     TextField("Enter password", text: $password)
@@ -35,7 +35,7 @@ struct PasswordSetupView: View {
                             .padding().background(Color(.systemGray6)).cornerRadius(12)
                         }
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Confirm Password").font(.subheadline).fontWeight(.medium).foregroundColor(.secondary)
+                            Text("Confirm Password".localized).font(.subheadline).fontWeight(.medium).foregroundColor(.secondary)
                             if isPasswordVisible {
                                 TextField("Re-enter password", text: $confirmPassword)
                                     .font(.body)
@@ -51,9 +51,9 @@ struct PasswordSetupView: View {
                             }
                         }
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Requirements:").font(.caption).fontWeight(.medium).foregroundColor(.secondary)
-                            HStack { Image(systemName: password.count >= 4 ? "checkmark.circle.fill" : "circle").foregroundColor(password.count >= 4 ? .green : .secondary).font(.caption); Text("At least 4 characters").font(.caption).foregroundColor(.secondary); Spacer() }
-                            HStack { Image(systemName: (!password.isEmpty && !confirmPassword.isEmpty && password == confirmPassword) ? "checkmark.circle.fill" : "circle").foregroundColor((!password.isEmpty && !confirmPassword.isEmpty && password == confirmPassword) ? .green : .secondary).font(.caption); Text("Passwords match").font(.caption).foregroundColor(.secondary); Spacer() }
+                            Text("Requirements:".localized).font(.caption).fontWeight(.medium).foregroundColor(.secondary)
+                            HStack { Image(systemName: password.count >= 4 ? "checkmark.circle.fill" : "circle").foregroundColor(password.count >= 4 ? .green : .secondary).font(.caption); Text("At least 4 characters".localized).font(.caption).foregroundColor(.secondary); Spacer() }
+                            HStack { Image(systemName: (!password.isEmpty && !confirmPassword.isEmpty && password == confirmPassword) ? "checkmark.circle.fill" : "circle").foregroundColor((!password.isEmpty && !confirmPassword.isEmpty && password == confirmPassword) ? .green : .secondary).font(.caption); Text("Passwords match".localized).font(.caption).foregroundColor(.secondary); Spacer() }
                         }
                         .padding(.top, 8)
                         if !errorMessage.isEmpty { Text(errorMessage).font(.caption).foregroundColor(.red).padding(.horizontal) }
@@ -61,9 +61,9 @@ struct PasswordSetupView: View {
                     .padding(.horizontal, 24)
                     Spacer()
                     VStack(spacing: 16) {
-                        Button(action: handleSave) { Text("Save Password").font(.headline).fontWeight(.semibold).foregroundColor(.white).frame(maxWidth: .infinity).padding().background(LinearGradient(colors: [.blue, .blue.opacity(0.8)], startPoint: .leading, endPoint: .trailing)).cornerRadius(12) }
+                        Button(action: handleSave) { Text("Save Password".localized).font(.headline).fontWeight(.semibold).foregroundColor(.white).frame(maxWidth: .infinity).padding().background(LinearGradient(colors: [.blue, .blue.opacity(0.8)], startPoint: .leading, endPoint: .trailing)).cornerRadius(12) }
                         .disabled(!isFormValid).opacity(isFormValid ? 1.0 : 0.6)
-                        Button("Cancel") { dismiss() }.font(.body).foregroundColor(.secondary)
+                        Button("Cancel".localized) { dismiss() }.font(.body).foregroundColor(.secondary)
                     }
                     .padding(.horizontal, 24).padding(.bottom, 40)
                 }
@@ -101,14 +101,14 @@ struct SecurityView: View {
             ScrollView {
                 VStack(spacing: 32) {
                     VStack(spacing: 8) {
-                        Text("Security").font(.largeTitle).fontWeight(.bold).foregroundColor(.primary)
-                        Text("Protect your financial data with advanced security options").font(.subheadline).foregroundColor(.secondary).multilineTextAlignment(.center)
+                        Text("Security".localized).font(.largeTitle).fontWeight(.bold).foregroundColor(.primary)
+                        Text("Protect your financial data with advanced security options".localized).font(.subheadline).foregroundColor(.secondary).multilineTextAlignment(.center)
                     }
                     .padding(.top, 20)
                     
                     // Security Type Selection
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("SECURITY TYPE").font(.caption).fontWeight(.medium).foregroundColor(.secondary).padding(.horizontal, 20)
+                        Text("SECURITY TYPE".localized).font(.caption).fontWeight(.medium).foregroundColor(.secondary).padding(.horizontal, 20)
                         VStack(spacing: 0) {
                             ForEach(Array(SecurityType.allCases.enumerated()), id: \.element) { index, type in
                                 SecurityTypeRow(type: type, isSelected: selectedSecurityType == type, onTap: { handleSecurityTypeChange(type) })
@@ -124,7 +124,7 @@ struct SecurityView: View {
                     // Password settings
                     if selectedSecurityType == .password || selectedSecurityType == .both {
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("PASSWORD SETTINGS").font(.caption).fontWeight(.medium).foregroundColor(.secondary).padding(.horizontal, 20)
+                            Text("PASSWORD SETTINGS".localized).font(.caption).fontWeight(.medium).foregroundColor(.secondary).padding(.horizontal, 20)
                             VStack(spacing: 0) {
                                 if !hasPassword {
                                     Button(action: { showPasswordSetup = true }) { row(icon: "key.fill", text: "Set Password") }
@@ -142,7 +142,7 @@ struct SecurityView: View {
                     // Biometric
                     if selectedSecurityType == .biometric || selectedSecurityType == .both {
                         VStack(alignment: .leading, spacing: 16) {
-                            Text("BIOMETRIC AUTHENTICATION").font(.caption).fontWeight(.medium).foregroundColor(.secondary).padding(.horizontal, 20)
+                            Text("BIOMETRIC AUTHENTICATION".localized).font(.caption).fontWeight(.medium).foregroundColor(.secondary).padding(.horizontal, 20)
                             VStack(spacing: 16) {
                                 HStack(spacing: 16) {
                                     Image(systemName: securityManager.biometricType == .faceID ? "faceid" : (securityManager.biometricType == .touchID ? "touchid" : "lock.shield")).font(.system(size: 40)).foregroundColor(.blue)
@@ -155,7 +155,7 @@ struct SecurityView: View {
                                     }
                                     Spacer()
                                 }
-                                if !securityManager.isBiometricAvailable { Text("Biometric authentication is not available on this device.").font(.caption).foregroundColor(.secondary) }
+                                if !securityManager.isBiometricAvailable { Text("Biometric authentication is not available on this device.".localized).font(.caption).foregroundColor(.secondary) }
                             }
                             .padding(20).background(Color(.systemBackground)).cornerRadius(12).shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
                         }
@@ -164,7 +164,7 @@ struct SecurityView: View {
                     
                     // Test
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("SECURITY TEST").font(.caption).fontWeight(.medium).foregroundColor(.secondary).padding(.horizontal, 20)
+                        Text("SECURITY TEST".localized).font(.caption).fontWeight(.medium).foregroundColor(.secondary).padding(.horizontal, 20)
                         Button(action: testAuthentication) { row(icon: "shield.checkered", text: "Test Authentication", tint: selectedSecurityType == .none ? .secondary : .blue) }
                             .disabled(selectedSecurityType == .none)
                             .background(Color(.systemBackground)).cornerRadius(12).shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2).opacity(selectedSecurityType == .none ? 0.6 : 1.0)
@@ -175,10 +175,10 @@ struct SecurityView: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { dismiss() }.font(.body).fontWeight(.medium) } }
+            .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done".localized) { dismiss() }.font(.body).fontWeight(.medium) } }
         }
         .sheet(isPresented: $showPasswordSetup) { PasswordSetupView(password: $password, confirmPassword: $confirmPassword, isPasswordVisible: $isPasswordVisible, onSave: savePassword) }
-        .alert("Security", isPresented: $showAlert) { Button("OK") { } } message: { Text(alertMessage) }
+        .alert("Security", isPresented: $showAlert) { Button("OK".localized) { } } message: { Text(alertMessage) }
         .onAppear { hasPassword = UserDefaultsManager.loadSecurityPassword() != nil }
     }
     

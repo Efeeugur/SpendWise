@@ -84,7 +84,7 @@ struct IncomesView: View {
                         .minimumScaleFactor(0.8)
                         .lineLimit(1)
                     
-                    Text("\(incomes.count) income\(incomes.count == 1 ? "" : "s")")
+                    Text(String(format: "%d incomes".localized, incomes.count))
                         .font(.caption)
                         .foregroundColor(.white.opacity(0.8))
                 }
@@ -180,7 +180,7 @@ struct IncomesView: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                 
-                Text("Start tracking your income sources to get insights into your financial growth.")
+                Text("Start tracking your income sources to get insights into your financial growth.".localized)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -193,7 +193,7 @@ struct IncomesView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "plus")
                         .font(.system(size: 16, weight: .semibold))
-                    Text("Add First Income")
+                    Text("Add First Income".localized)
                         .font(.subheadline)
                         .fontWeight(.semibold)
                 }
@@ -414,21 +414,21 @@ struct IncomeCard: View {
         }
         .buttonStyle(PlainButtonStyle())
         .contextMenu {
-            Button("Edit", systemImage: "pencil") {
+            Button("Edit".localized, systemImage: "pencil") {
                 onTap()
             }
             
-            Button("Delete", systemImage: "trash", role: .destructive) {
+            Button("Delete".localized, systemImage: "trash", role: .destructive) {
                 showingDeleteAlert = true
             }
         }
         .alert("Delete Income", isPresented: $showingDeleteAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Delete", role: .destructive) {
+            Button("Cancel".localized, role: .cancel) { }
+            Button("Delete".localized, role: .destructive) {
                 onDelete()
             }
         } message: {
-            Text("Are you sure you want to delete this income entry?")
+            Text("Are you sure you want to delete this income entry?".localized)
         }
     }
     
