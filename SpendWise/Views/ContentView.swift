@@ -45,6 +45,9 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .userDidLogin)) { _ in
             dataManager.updateUser(UserDefaultsManager.loadUser())
+            Task {
+                await dataManager.sync()
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
             if UserDefaultsManager.loadSecurityType() != .none {

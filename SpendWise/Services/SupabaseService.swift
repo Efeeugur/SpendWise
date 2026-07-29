@@ -154,6 +154,7 @@ final class SupabaseService {
     private struct IncomeRow: Codable {
         let id: String
         let user_email: String
+        let user_id: String?
         let title: String
         let date: String
         let amount: Double
@@ -165,6 +166,7 @@ final class SupabaseService {
     private struct ExpenseRow: Codable {
         let id: String
         let user_email: String
+        let user_id: String?
         let title: String
         let date: String
         let amount: Double
@@ -173,6 +175,20 @@ final class SupabaseService {
         let currency: String
         let note: String?
         let photo_url: String?
+    }
+
+    // Helper to extract user_id (sub) from JWT
+    private func currentUserId() -> String? {
+        guard let token = UserDefaults.standard.string(forKey: "supabase_token") else { return nil }
+        let parts = token.components(separatedBy: ".")
+        guard parts.count == 3 else { return nil }
+        var base64 = parts[1].replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
+        let paddedLength = base64.count + (4 - (base64.count % 4)) % 4
+        base64 = base64.padding(toLength: paddedLength, withPad: "=", startingAt: 0)
+        guard let data = Data(base64Encoded: base64),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let sub = json["sub"] as? String else { return nil }
+        return sub
     }
 
     // MARK: Incomes
@@ -192,14 +208,19 @@ final class SupabaseService {
         }
     }
     func createIncome(email: String, income: Income) async throws {
-        let row = IncomeRow(id: income.id.uuidString, user_email: email, title: income.title, date: iso.string(from: income.date), amount: income.amount, category: income.category.rawValue, currency: income.currency.rawValue, note: income.note, photo_url: nil)
+        let uid = currentUserId()
+        let row = IncomeRow(id: income.id.uuidString, user_email: email, user_id: uid, title: income.title, date: iso.string(from: income.date), amount: income.amount, category: income.category.rawValue, currency: income.currency.rawValue, note: income.note, photo_url: nil)
         let body = try JSONEncoder().encode([row]) // array is acceptable for bulk insert; supabase accepts array or object
         let req = try makeRequest(path: "incomes", method: "POST", body: body)
-        let (_, resp) = try await URLSession.shared.data(for: req)
-        guard let http = resp as? HTTPURLResponse, (200...299).contains(http.statusCode) else { throw SupabaseError.server("Create income failed") }
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse, (200...299).contains(http.statusCode) else { 
+            let msg = String(data: data, encoding: .utf8) ?? "Unknown"
+            throw SupabaseError.server("Create income failed: \(msg)") 
+        }
     }
     func updateIncome(_ income: Income) async throws {
-        let row = IncomeRow(id: income.id.uuidString, user_email: "", title: income.title, date: iso.string(from: income.date), amount: income.amount, category: income.category.rawValue, currency: income.currency.rawValue, note: income.note, photo_url: nil)
+        let uid = currentUserId()
+        let row = IncomeRow(id: income.id.uuidString, user_email: "", user_id: uid, title: income.title, date: iso.string(from: income.date), amount: income.amount, category: income.category.rawValue, currency: income.currency.rawValue, note: income.note, photo_url: nil)
         let body = try JSONEncoder().encode([row])
         let req = try makeRequest(path: "incomes", method: "PATCH", query: [URLQueryItem(name: "id", value: "eq.\(income.id.uuidString)")], body: body)
         let (_, resp) = try await URLSession.shared.data(for: req)
@@ -228,14 +249,19 @@ final class SupabaseService {
         }
     }
     func createExpense(email: String, expense: Expense) async throws {
-        let row = ExpenseRow(id: expense.id.uuidString, user_email: email, title: expense.title, date: iso.string(from: expense.date), amount: expense.amount, type: expense.type.rawValue, category: expense.category.rawValue, currency: expense.currency.rawValue, note: expense.note, photo_url: nil)
+        let uid = currentUserId()
+        let row = ExpenseRow(id: expense.id.uuidString, user_email: email, user_id: uid, title: expense.title, date: iso.string(from: expense.date), amount: expense.amount, type: expense.type.rawValue, category: expense.category.rawValue, currency: expense.currency.rawValue, note: expense.note, photo_url: nil)
         let body = try JSONEncoder().encode([row])
         let req = try makeRequest(path: "expenses", method: "POST", body: body)
-        let (_, resp) = try await URLSession.shared.data(for: req)
-        guard let http = resp as? HTTPURLResponse, (200...299).contains(http.statusCode) else { throw SupabaseError.server("Create expense failed") }
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse, (200...299).contains(http.statusCode) else { 
+            let msg = String(data: data, encoding: .utf8) ?? "Unknown"
+            throw SupabaseError.server("Create expense failed: \(msg)") 
+        }
     }
     func updateExpense(_ expense: Expense) async throws {
-        let row = ExpenseRow(id: expense.id.uuidString, user_email: "", title: expense.title, date: iso.string(from: expense.date), amount: expense.amount, type: expense.type.rawValue, category: expense.category.rawValue, currency: expense.currency.rawValue, note: expense.note, photo_url: nil)
+        let uid = currentUserId()
+        let row = ExpenseRow(id: expense.id.uuidString, user_email: "", user_id: uid, title: expense.title, date: iso.string(from: expense.date), amount: expense.amount, type: expense.type.rawValue, category: expense.category.rawValue, currency: expense.currency.rawValue, note: expense.note, photo_url: nil)
         let body = try JSONEncoder().encode([row])
         let req = try makeRequest(path: "expenses", method: "PATCH", query: [URLQueryItem(name: "id", value: "eq.\(expense.id.uuidString)")], body: body)
         let (_, resp) = try await URLSession.shared.data(for: req)
