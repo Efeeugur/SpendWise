@@ -244,49 +244,7 @@ struct ProfileSettingsView: View {
                     .buttonStyle(PlainButtonStyle())
                 }
                 
-                // SUPPORT SECTION
-                Section(header: Text("Support".localized)) {
-                    // Help & FAQ
-                    Button {
-                        if let url = URL(string: "mailto:support@spendwise.app?subject=SpendWise%20Help") {
-                            UIApplication.shared.open(url)
-                        }
-                    } label: {
-                        HStack {
-                            Image(systemName: "questionmark.circle")
-                                .foregroundColor(.orange)
-                                .frame(width: 24)
-                            Text("Help & FAQ".localized)
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    
-                    // Rate App
-                    Button {
-                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                            AppStore.requestReview(in: windowScene)
-                        }
-                    } label: {
-                        HStack {
-                            Image(systemName: "star")
-                                .foregroundColor(.yellow)
-                                .frame(width: 24)
-                            Text("Rate App".localized)
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-                
+
                 // APP INFO SECTION
                 Section(header: Text("App Info".localized)) {
                     HStack {
@@ -340,22 +298,6 @@ struct ProfileSettingsView: View {
                     }
                     .buttonStyle(PlainButtonStyle())
                     
-                    Button {
-                        if let url = URL(string: "https://spendwise.app/support") { UIApplication.shared.open(url) }
-                    } label: {
-                        HStack {
-                            Image(systemName: "lifepreserver.fill")
-                                .foregroundColor(.orange)
-                                .frame(width: 24)
-                            Text("Support".localized) // We already have a "Support" string from previous section, it'll reuse it
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Image(systemName: "arrow.up.right.square")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .buttonStyle(PlainButtonStyle())
                 }
             }
             .navigationTitle("Profile & Settings".localized)
