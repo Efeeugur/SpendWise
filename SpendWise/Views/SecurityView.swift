@@ -166,14 +166,7 @@ struct SecurityView: View {
                         .padding(.horizontal, 20)
                     }
                     
-                    // Test
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("SECURITY TEST".localized).font(.caption).fontWeight(.medium).foregroundColor(.secondary).padding(.horizontal, 20)
-                        Button(action: testAuthentication) { row(icon: "shield.checkered", text: "Test Authentication", tint: selectedSecurityType == .none ? .secondary : .blue) }
-                            .disabled(selectedSecurityType == .none)
-                            .background(Color(.systemBackground)).cornerRadius(12).shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2).opacity(selectedSecurityType == .none ? 0.6 : 1.0)
-                    }
-                    .padding(.horizontal, 20)
+
                 }
                 .padding(.bottom, 40)
             }
@@ -194,6 +187,7 @@ struct SecurityView: View {
             Image(systemName: "chevron.right").foregroundColor(.secondary).font(.caption)
         }
         .padding(20)
+        .contentShape(Rectangle())
     }
     
     private func handleSecurityTypeChange(_ newType: SecurityType) {
@@ -225,16 +219,7 @@ struct SecurityView: View {
         alertMessage = "Password removed successfully."; showAlert = true
     }
     
-    private func testAuthentication() {
-        switch selectedSecurityType {
-        case .password: showPasswordSetup = true
-        case .biometric:
-            securityManager.authenticateWithBiometrics { success in
-                alertMessage = success ? "Biometric authentication successful!" : "Biometric authentication failed."; showAlert = true
-            }
-        case .none: break
-        }
-    }
+
 }
 
 // MARK: - Security Type Row
@@ -255,6 +240,7 @@ struct SecurityTypeRow: View {
             }
             .padding(20)
             .background(isSelected ? Color.blue.opacity(0.1) : Color.clear)
+            .contentShape(Rectangle())
         }
         .buttonStyle(PlainButtonStyle())
     }

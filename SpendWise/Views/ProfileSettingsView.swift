@@ -217,6 +217,7 @@ struct ProfileSettingsView: View {
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
