@@ -110,10 +110,14 @@ struct SecurityView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("SECURITY TYPE".localized).font(.caption).fontWeight(.medium).foregroundColor(.secondary).padding(.horizontal, 20)
                         VStack(spacing: 0) {
-                            ForEach(Array(SecurityType.allCases.enumerated()), id: \.element) { index, type in
+                            let availableTypes = SecurityType.allCases.filter { type in
+                                if type == .biometric { return securityManager.isBiometricAvailable }
+                                return true
+                            }
+                            ForEach(Array(availableTypes.enumerated()), id: \.element) { index, type in
                                 SecurityTypeRow(type: type, isSelected: selectedSecurityType == type, onTap: { handleSecurityTypeChange(type) })
                                     .background(Color(.systemBackground))
-                                if index < SecurityType.allCases.count - 1 { Divider().padding(.leading, 20) }
+                                if index < availableTypes.count - 1 { Divider().padding(.leading, 20) }
                             }
                         }
                         .background(Color(.systemBackground)).cornerRadius(12).shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 2)
@@ -122,7 +126,7 @@ struct SecurityView: View {
                     .padding(.horizontal, 20)
                     
                     // Password settings
-                    if selectedSecurityType == .password || selectedSecurityType == .both {
+                    if selectedSecurityType == .password {
                         VStack(alignment: .leading, spacing: 16) {
                             Text("PASSWORD SETTINGS".localized).font(.caption).fontWeight(.medium).foregroundColor(.secondary).padding(.horizontal, 20)
                             VStack(spacing: 0) {
@@ -140,7 +144,7 @@ struct SecurityView: View {
                     }
                     
                     // Biometric
-                    if selectedSecurityType == .biometric || selectedSecurityType == .both {
+                    if selectedSecurityType == .biometric {
                         VStack(alignment: .leading, spacing: 16) {
                             Text("BIOMETRIC AUTHENTICATION".localized).font(.caption).fontWeight(.medium).foregroundColor(.secondary).padding(.horizontal, 20)
                             VStack(spacing: 16) {
@@ -194,7 +198,7 @@ struct SecurityView: View {
     
     private func handleSecurityTypeChange(_ newType: SecurityType) {
         switch newType {
-        case .password, .both:
+        case .password:
             if !hasPassword { showPasswordSetup = true; return }
             UserDefaultsManager.saveSecurityType(newType); selectedSecurityType = newType
         case .biometric:
@@ -218,7 +222,6 @@ struct SecurityView: View {
     private func removePassword() {
         UserDefaultsManager.clearSecurityPassword(); hasPassword = false
         if selectedSecurityType == .password { selectedSecurityType = .none; UserDefaultsManager.saveSecurityType(.none) }
-        else if selectedSecurityType == .both { selectedSecurityType = .biometric; UserDefaultsManager.saveSecurityType(.biometric) }
         alertMessage = "Password removed successfully."; showAlert = true
     }
     
@@ -228,10 +231,6 @@ struct SecurityView: View {
         case .biometric:
             securityManager.authenticateWithBiometrics { success in
                 alertMessage = success ? "Biometric authentication successful!" : "Biometric authentication failed."; showAlert = true
-            }
-        case .both:
-            securityManager.authenticateWithBiometrics { success in
-                if success { alertMessage = "Biometric authentication successful!"; showAlert = true } else { showPasswordSetup = true }
             }
         case .none: break
         }
@@ -248,8 +247,8 @@ struct SecurityTypeRow: View {
         Button(action: onTap) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(type.rawValue).font(.body).fontWeight(.medium).foregroundColor(.primary)
-                    Text(type.description).font(.caption).foregroundColor(.secondary).fixedSize(horizontal: false, vertical: true)
+                    Text(type.title.localized).font(.body).fontWeight(.medium).foregroundColor(.primary)
+                    Text(type.description.localized).font(.caption).foregroundColor(.secondary).fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer()
                 if isSelected { Image(systemName: "checkmark.circle.fill").foregroundColor(.blue).font(.body) }

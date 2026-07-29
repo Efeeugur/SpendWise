@@ -6,14 +6,20 @@ enum SecurityType: String, CaseIterable, Codable {
     case none = "No Protection"
     case password = "Password"
     case biometric = "Face ID / Touch ID"
-    case both = "Password + Face ID / Touch ID"
+    
+    var title: String {
+        switch self {
+        case .none: return "No Protection"
+        case .password: return "Password"
+        case .biometric: return SecurityManager.shared.getBiometricTypeName()
+        }
+    }
     
     var description: String {
         switch self {
         case .none: return "No app protection"
         case .password: return "Protected with password only"
-        case .biometric: return "Protected with Face ID / Touch ID only"
-        case .both: return "Protected with password and Face ID / Touch ID"
+        case .biometric: return "Protected with \(SecurityManager.shared.getBiometricTypeName()) only"
         }
     }
 }

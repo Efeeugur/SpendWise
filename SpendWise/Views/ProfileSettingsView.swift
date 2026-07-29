@@ -208,7 +208,7 @@ struct ProfileSettingsView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("App Protection".localized)
                                     .foregroundColor(.primary)
-                                Text(UserDefaultsManager.loadSecurityType().rawValue.localized)
+                                Text(UserDefaultsManager.loadSecurityType().title.localized)
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }

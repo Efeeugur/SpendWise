@@ -58,7 +58,7 @@ struct AuthenticationView: View {
             } else {
                 // Authentication options
                 VStack(spacing: 20) {
-                    if securityType == .biometric || securityType == .both {
+                    if securityType == .biometric {
                         Button {
                             authenticateWithBiometrics()
                         } label: {
@@ -77,7 +77,7 @@ struct AuthenticationView: View {
                         .disabled(!securityManager.isBiometricAvailable)
                     }
                     
-                    if securityType == .password || securityType == .both {
+                    if securityType == .password {
                         VStack(spacing: 12) {
                             HStack {
                                 if isPasswordVisible {
@@ -162,7 +162,7 @@ struct AuthenticationView: View {
             
             // Auto biometric auth
             if !securityManager.isLockedOut &&
-               (securityType == .biometric || securityType == .both) &&
+               (securityType == .biometric) &&
                securityManager.isBiometricAvailable {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     authenticateWithBiometrics()
