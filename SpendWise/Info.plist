@@ -23,5 +23,7 @@
 
     <key>UIApplicationSupportsShakeToEdit</key>
     <true/>
+    <key>NSFaceIDUsageDescription</key>
+    <string>Uygulamaya güvenli giriş yapabilmeniz için Face ID izni gereklidir.</string>
 </dict>
 </plist>
